@@ -7,7 +7,7 @@ import type * as Plugin from "@docusaurus/types/src/plugin";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 
 const config: Config = {
-  title: "My Site",
+  title: "Deel API",
   tagline: "Dinosaurs are cool",
   url: "https://github.com",
   baseUrl: "/integapi/",
@@ -18,7 +18,7 @@ const config: Config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "stefano.romanelli-Deel", // Usually your GitHub org/user name.
+  organizationName: "stefano-romanelli-Deel", // Usually your GitHub org/user name.
   projectName: "integapi", // Usually your repo name.
   deploymentBranch: "gh-pages",
 
@@ -64,17 +64,17 @@ const config: Config = {
           src: "img/logo.svg",
         },
         items: [
+          // {
+          //   type: "doc",
+          //   docId: "intro",
+          //   position: "left",
+          //   label: "Tutorial",
+          // },
+          // { to: "/blog", label: "Blog", position: "left" },
           {
-            type: "doc",
-            docId: "intro",
+            label: "Integrations API",
             position: "left",
-            label: "Tutorial",
-          },
-          { to: "/blog", label: "Blog", position: "left" },
-          {
-            label: "Petstore API",
-            position: "left",
-            to: "/docs/category/petstore-api",
+            to: "/docs/category/integrations-api",
           },
           {
             href: "https://github.com/facebook/docusaurus",
@@ -241,14 +241,14 @@ const config: Config = {
     [
       "docusaurus-plugin-openapi-docs",
       {
-        id: "openapi",
+        id: "integrations",
         docsPluginId: "classic",
         config: {
-          petstore: {
-            specPath: "examples/petstore.yaml",
-            outputDir: "docs/petstore",
-            downloadUrl:
-              "https://raw.githubusercontent.com/PaloAltoNetworks/docusaurus-template-openapi-docs/main/examples/petstore.yaml",
+          integrations: {
+            specPath: "examples/integrations-api.yaml",
+            outputDir: "docs/integrations",
+            // downloadUrl:
+            //   "https://raw.githubusercontent.com/PaloAltoNetworks/docusaurus-template-openapi-docs/main/examples/petstore.yaml",
             sidebarOptions: {
               groupPathsBy: "tag",
               categoryLinkSource: "tag",
