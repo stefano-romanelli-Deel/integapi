@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkintegapi=self.webpackChunkintegapi||[]).push([[1903],{1912:e=>{e.exports=JSON.parse('{"blogBasePath":"/integapi/blog","blogTitle":"Blog","authorsListPath":"/integapi/blog/authors"}')}}]);
