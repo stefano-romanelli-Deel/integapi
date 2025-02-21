@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    paths: [integapi/**]
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
@@ -24,7 +23,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build website
-        working-directory: integapi
         run: yarn build
 
       - name: Upload Build Artifact
@@ -51,5 +49,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          publish_dir: ./integapi/build
