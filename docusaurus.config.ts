@@ -7,8 +7,8 @@ import type * as Plugin from "@docusaurus/types/src/plugin";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 
 const config: Config = {
-  title: "Deel API",
-  tagline: "Dinosaurs are cool",
+  title: "Deel IntegrationsAPI",
+  tagline: "Integrations API",
   url: "https://github.com",
   baseUrl: "/integapi/",
   onBrokenLinks: "throw",
