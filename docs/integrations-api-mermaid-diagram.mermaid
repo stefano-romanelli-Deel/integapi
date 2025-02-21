@@ -1,0 +1,80 @@
+flowchart TD
+    %% Integration Node
+    A["Integration<br>(Overall integration info)"]
+    A1["ID<br>(Unique integration ID)<br><code>12345</code>"]
+    A2["Third Party Software<br>(Software connected)<br><code>netsuite</code>"]
+    A3["Display Name<br>(Human-readable name)<br><code>NetSuite 2.0</code>"]
+    A4["Deprecated<br>(Integration active?)<br><code>false</code>"]
+    A5["Categories<br>(Integration categories)<br><code>[accounting, automation]</code>"]
+    A6["Product Lines<br>(List of product lines)<br><code>global_payroll</code>"]
+    A7["Prerequisites<br>(Requirements, e.g., software features)<br><code>req1, req2, req3</code>"]
+    A8["Use Cases<br>(Use case details)<br><code>employee_onboarding</code>"]
+    
+    A --> A1
+    A --> A2
+    A --> A3
+    A --> A4
+    A --> A5
+    A --> A6
+    A --> A7
+    A --> A8
+
+    %% Product Lines Subgraph
+    subgraph PL [Product Lines]
+      B["Product Line<br>(Product line identifier)<br><code>global_payroll</code>"]
+      C["Sync Types<br>(Types of data sync)<br><code>employee_data</code>"]
+      B --> C
+    end
+    A6 --> PL
+
+    %% Sync Types Subgraph
+    subgraph ST [Sync Types]
+      D["Type<br>(Sync type)<br><code>employee_data</code>"]
+      E["Techs<br>(Technologies used)<br><code>[api_open, sftp]</code>"]
+      F["Standalone<br>(Operates independently?)<br><code>true</code>"]
+      G["Depends On<br>(Dependencies)<br><code>[]</code>"]
+      H["Where Set Up<br>(Sync setup location)<br><code>employee_sync_plugin</code>"]
+      I["Sync Data<br>(Selected data fields)<br><code>various</code>"]
+      D --> E
+      D --> F
+      D --> G
+      D --> H
+      D --> I
+      C --> D
+    end
+
+    %% Sync Data Subgraph
+    subgraph SD [Sync Data]
+      J["Job Info<br>(Job-related fields)<br><code>job_title, job_info_effective_date</code>"]
+      K["Personal Info<br>(Personal fields)<br><code>first_name, last_name, city</code>"]
+      L["Country Specific Info<br>(Country-specific fields)<br><code>national_id, tax_code</code><br>Applicable: national_id → [BR,UY,ES,IT], tax_code → [GB,JP]"]
+      M["Work Info<br>(Work details)<br><code>email, start_date, fte</code>"]
+      N["Compensation Info<br>(Payment details)<br><code>pay_rate, pay_rate_time_frame</code>"]
+      O["Employment Info<br>(Contract details)<br><code>employment_type, employment_effective_date</code>"]
+      P["Cost Centers<br>(Cost center info)<br><code>cost_center_code, cost_center_name</code>"]
+      Q["Bank Info<br>(Bank details)<br><code>bank_account_number, bank_name</code>"]
+      R["Custom Info<br>(Custom fields)<br><code>custom_field_1</code>"]
+      S["Third Party Custom Info<br>(Third party fields)<br><code>third_party_field_1</code>"]
+      I --> J
+      I --> K
+      I --> L
+      I --> M
+      I --> N
+      I --> O
+      I --> P
+      I --> Q
+      I --> R
+      I --> S
+    end
+
+    %% Prerequisites Subgraph
+    subgraph PR [Prerequisites]
+      T["Software<br>(Required features)<br><code>req1, req2, req3</code>"]
+    end
+    A7 --> PR
+
+    %% Use Cases Subgraph
+    subgraph UC [Use Cases]
+      U["Employee Onboarding<br>(Onboarding new employees)<br><code>Direction: inbound; Notes: onboarding notes; Requirements: HR module, API credentials</code>"]
+    end
+    A8 --> UC
