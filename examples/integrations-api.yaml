@@ -50,13 +50,13 @@ paths:
       operationId: "listEmployeeSyncData"
       parameters:
         - name: "country"
-          in: query
+          in: "query"
           description: >
             Optional ISO country code (e.g. "BR") to filter the field definitions.
             When provided, only fields required for that country (and, for country-specific categories, whose applicable_countries include the given code) are returned.
           required: false
           schema:
-            type: string
+            type: "string"
       responses:
         "200":
           description: >
@@ -67,7 +67,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                type: "array"
                 items:
                   anyOf:
                     - $ref: "#/components/schemas/EmployeeSyncFieldDefinitionsGeneric"
@@ -152,12 +152,12 @@ paths:
       operationId: "listUseCases"
       parameters:
         - name: "use_case"
-          in: query
+          in: "query"
           description: >
             Optional use case name (e.g. "employee_onboarding") to filter the results.
           required: false
           schema:
-            type: string
+            type: "string"
             enum: ["employee_onboarding", "payroll_processing", "time_tracking", "benefits_management", "vendor_management"]
       responses:
         "200":
@@ -165,7 +165,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                type: "array"
                 items:
                   $ref: "#/components/schemas/UseCaseDetail"
               example:
@@ -194,30 +194,30 @@ paths:
 components:
   securitySchemes:
     apiKeyAuth:
-      type: apiKey
-      in: header
+      type: "apiKey"
+      in: "header"
       name: "X-API-Key"
   schemas:
     # ---------------------------------------------------
     # 1) Integration and Related Schemas
     # ---------------------------------------------------
     Integration:
-      type: object
+      type: "object"
       required:
-        - id
-        - third_party_software
-        - display_name
-        - deprecated
-        - categories
-        - product_lines
-        - requirements
+        - "id"
+        - "third_party_software"
+        - "display_name"
+        - "deprecated"
+        - "categories"
+        - "product_lines"
+        - "requirements"
       properties:
         id:
-          type: string
+          type: "string"
           description: "A unique identifier for the integration."
           example: "12345"
         third_party_software:
-          type: string
+          type: "string"
           description: "The third-party software that this integration connects to."
           enum:
             - "netsuite"
@@ -251,21 +251,21 @@ components:
             - "workday_gpc"
           example: "netsuite"
         display_name:
-          type: string
+          type: "string"
           description: "A human-readable name for the integration."
           example: "NetSuite 2.0"
         deprecated:
-          type: boolean
+          type: "boolean"
           description: "Indicates if the integration is deprecated."
           example: false
         categories:
-          type: array
+          type: "array"
           description: "One or more categories this integration belongs to."
           items:
             $ref: "#/components/schemas/Category"
           example: ["accounting", "automation"]
         product_lines:
-          type: array
+          type: "array"
           description: "Product lines supported by this integration."
           minItems: 2
           items:
@@ -330,7 +330,7 @@ components:
                     url: "/use_cases?use_case=benefits_management"
                     description: "Retrieve detailed info for benefits_management."
         requirements:
-          type: array
+          type: "array"
           description: "List of requirements for the integration."
           items:
             $ref: "#/components/schemas/Requirement"
@@ -410,7 +410,7 @@ components:
           - category: "permissions"
             content: ["User must have admin rights", "Consent required"]
     Category:
-      type: string
+      type: "string"
       description: "A category this integration belongs to."
       enum:
         - "global_payroll"
@@ -436,28 +436,28 @@ components:
         - "hcm"
       example: "accounting"
     ProductLines:
-      type: object
+      type: "object"
       required:
-        - type
-        - sync_types
-        - categories
-        - use_cases
+        - "type"
+        - "sync_types"
+        - "categories"
+        - "use_cases"
       properties:
         line:
           $ref: "#/components/schemas/ProductLine"
         sync_types:
-          type: array
+          type: "array"
           description: "List of sync types for this product line."
           minItems: 1
           items:
             $ref: "#/components/schemas/SyncType"
         categories:
-          type: array
+          type: "array"
           description: "Categories associated with this product line."
           items:
             $ref: "#/components/schemas/Category"
         use_cases:
-          type: array
+          type: "array"
           description: "List of use cases for the product line (minimal info)."
           items:
             $ref: "#/components/schemas/UseCaseRef"
@@ -492,7 +492,7 @@ components:
               url: "/use_cases?use_case=payroll_processing"
               description: "Retrieve detailed info for payroll_processing."
     ProductLine:
-      type: string
+      type: "string"
       description: "Available product lines."
       enum:
         - "employer_of_record"
@@ -504,13 +504,13 @@ components:
         - "deel_it"
         - "deel_hr"
     Requirement:
-      type: object
+      type: "object"
       required:
-        - category
-        - content
+        - "category"
+        - "content"
       properties:
         category:
-          type: string
+          type: "string"
           description: "The type of requirement."
           enum:
             - "software"
@@ -519,21 +519,21 @@ components:
             - "pricing"
           example: "software"
         content:
-          type: array
+          type: "array"
           description: "List of requirement texts."
           items:
-            type: string
+            type: "string"
       example:
         category: "software"
         content: ["This is a requirement one", "This is a requirement two"]
     UseCaseRef:
-      type: object
+      type: "object"
       required:
-        - use_case
-        - more_info
+        - "use_case"
+        - "more_info"
       properties:
         use_case:
-          type: string
+          type: "string"
           description: "The use case name."
           example: "employee_onboarding"
           enum:
@@ -545,42 +545,42 @@ components:
         more_info:
           $ref: "#/components/schemas/UseCaseLink"
     UseCaseLink:
-      type: object
+      type: "object"
       required:
-        - method
-        - url
+        - "method"
+        - "url"
       properties:
         method:
-          type: string
+          type: "string"
           description: "HTTP method to retrieve detailed use case info."
           example: "GET"
         url:
-          type: string
+          type: "string"
           description: "Relative URL to fetch detailed use case info."
           example: "/use_cases?use_case=employee_onboarding"
         description:
-          type: string
+          type: "string"
           description: "A brief description of the link."
           example: "Retrieve detailed info for the use case."
     UseCaseDetail:
-      type: object
+      type: "object"
       required:
-        - use_case
-        - sync_direction
-        - notes
-        - requirements
+        - "use_case"
+        - "sync_direction"
+        - "notes"
+        - "requirements"
       properties:
         use_case:
           $ref: "#/components/schemas/UseCaseEnum"
         sync_direction:
           $ref: "#/components/schemas/SyncDirectionEnum"
         notes:
-          type: array
+          type: "array"
           description: "A list of integration-specific notes for the use case."
           items:
-            type: string
+            type: "string"
         requirements:
-          type: array
+          type: "array"
           description: "List of requirements for the use case."
           items:
             $ref: "#/components/schemas/Requirement"
@@ -596,7 +596,7 @@ components:
               - "Must have HR module enabled."
               - "Requires API credentials."
     UseCaseEnum:
-      type: string
+      type: "string"
       description: "Allowed use cases for integrations."
       enum:
         - "employee_onboarding"
@@ -610,40 +610,39 @@ components:
         time_tracking: "Use case for tracking time and attendance."
         benefits_management: "Use case for managing employee benefits."
         vendor_management: "Use case for managing vendor relationships."
-
     # ---------------------------------------------------
     # 2) Sync Type, Technologies, Where Set Up, Directions, and Requirements
     # ---------------------------------------------------
     SyncType:
-      type: object
+      type: "object"
       required:
-        - type
-        - techs
-        - standalone
-        - where_set_up
-        - sync_data
-        - requirements
+        - "type"
+        - "techs"
+        - "standalone"
+        - "where_set_up"
+        - "sync_data"
+        - "requirements"
       properties:
         type:
           $ref: "#/components/schemas/SyncTypeEnum"
         techs:
-          type: array
+          type: "array"
           description: "The technologies used to sync the data."
           items:
             $ref: "#/components/schemas/SyncTechEnum"
           example: ["api_open", "sftp"]
         standalone:
-          type: boolean
+          type: "boolean"
           description: "Indicates whether this sync type can operate independently."
         depends_on:
-          type: array
+          type: "array"
           description: "If not standalone, lists the sync types that must be completed first."
           items:
             $ref: "#/components/schemas/SyncTypeEnum"
         where_set_up:
           $ref: "#/components/schemas/WhereSetUpEnum"
         requirements:
-          type: array
+          type: "array"
           description: "List of requirements for the sync type."
           items:
             $ref: "#/components/schemas/Requirement"
@@ -653,7 +652,7 @@ components:
             - category: "permissions"
               content: ["User must have admin rights", "Manager approval required"]
         sync_data:
-          type: array
+          type: "array"
           description: >
             For sync type "employee_data", specifies the active employee fields (grouped by category)
             for this integration.
@@ -686,7 +685,7 @@ components:
               - category: "job_info"
                 fields: ["job_title", "job_info_effective_date"]
     SyncTypeEnum:
-      type: string
+      type: "string"
       description: "Available sync types."
       enum:
         - "employee_data"
@@ -702,7 +701,7 @@ components:
         - "identity"
         - "people_match"
     SyncTechEnum:
-      type: string
+      type: "string"
       description: "Technologies used to sync data."
       enum:
         - "api_open"
@@ -710,7 +709,7 @@ components:
         - "sftp"
         - "webhook"
     WhereSetUpEnum:
-      type: string
+      type: "string"
       description: "The plugin or location where the sync is set up."
       enum:
         - "employee_sync_plugin"
@@ -727,11 +726,11 @@ components:
         pto_plugin: "Plugin for managing paid time off sync inside the integration."
         billing_and_invoice_sync: "Plugin for billing and invoice sync inside the integration."
         payment_sync_plugin: "Plugin for managing payment sync inside the integration."
-        people_section: "The main ""People"" section of Deel, accessible from the main nav."
+        people_section: "The main \"People\" section of Deel, accessible from the main nav."
         vendor_match: "Vendor matching synchronization."
-        payroll_section: "The main ""Payroll"" section of Deel, accessible from the main nav."
+        payroll_section: "The main \"Payroll\" section of Deel, accessible from the main nav."
     SyncDirectionEnum:
-      type: string
+      type: "string"
       description: "Specifies the data synchronization direction."
       enum:
         - "inbound"
@@ -741,22 +740,21 @@ components:
         inbound: "Data flows from the third-party system to Deel."
         outbound: "Data flows from Deel to the third-party system."
         bidirectional: "Data flows in both directions."
-
     # ---------------------------------------------------
     # 3) Sync Data Selection Objects (One per Category)
     # ---------------------------------------------------
     JobInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["job_info"]
           example: "job_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for job_info."
           items:
             $ref: "#/components/schemas/JobInfoFields"
@@ -764,17 +762,17 @@ components:
         category: "job_info"
         fields: ["job_title", "job_info_effective_date"]
     PersonalInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["personal_info"]
           example: "personal_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for personal_info."
           items:
             $ref: "#/components/schemas/PersonalInfoFields"
@@ -782,17 +780,17 @@ components:
         category: "personal_info"
         fields: ["first_name", "last_name", "city"]
     WorkInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["work_info"]
           example: "work_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for work_info."
           items:
             $ref: "#/components/schemas/WorkInfoFields"
@@ -800,17 +798,17 @@ components:
         category: "work_info"
         fields: ["email", "start_date", "fte"]
     CompensationInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["compensation_info"]
           example: "compensation_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for compensation_info."
           items:
             $ref: "#/components/schemas/CompensationInfoFields"
@@ -818,17 +816,17 @@ components:
         category: "compensation_info"
         fields: ["pay_rate", "pay_rate_time_frame"]
     EmploymentInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["employment_info"]
           example: "employment_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for employment_info."
           items:
             $ref: "#/components/schemas/EmploymentInfoFields"
@@ -836,96 +834,96 @@ components:
         category: "employment_info"
         fields: ["employment_type", "employment_effective_date"]
     CostCenters:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["cost_centers"]
           example: "cost_centers"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for cost_centers."
           items:
-            type: string
+            type: "string"
             enum: ["cost_center_code", "cost_center_name"]
       example:
         category: "cost_centers"
         fields: ["cost_center_code", "cost_center_name"]
     CountrySpecificInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["country_specific_info"]
           example: "country_specific_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for country_specific_info."
           items:
-            type: string
+            type: "string"
             enum: ["national_id", "tax_code"]
       example:
         category: "country_specific_info"
         fields: ["national_id", "tax_code"]
     BankInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["bank_info"]
           example: "bank_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for bank_info."
           items:
-            type: string
+            type: "string"
             enum: ["bank_account_number", "bank_routing_number", "bank_name"]
       example:
         category: "bank_info"
         fields: ["bank_account_number", "bank_routing_number"]
     CustomInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["custom_info"]
           example: "custom_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for custom_info."
           items:
-            type: string
+            type: "string"
             enum: ["custom_field_1", "custom_field_2"]
       example:
         category: "custom_info"
         fields: ["custom_field_1", "custom_field_2"]
     ThirdPartyCustomInfo:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           enum: ["third_party_custom_info"]
           example: "third_party_custom_info"
         fields:
-          type: array
+          type: "array"
           description: "List of active field keys for third_party_custom_info."
           items:
-            type: string
+            type: "string"
             enum: ["third_party_field_1", "third_party_field_2"]
       example:
         category: "third_party_custom_info"
@@ -935,59 +933,59 @@ components:
     # 5) /employee_sync/fields Detailed Field Definitions
     # ---------------------------------------------------
     FieldDefinition:
-      type: object
+      type: "object"
       required:
-        - name
-        - type
-        - label
-        - required
-        - description
+        - "name"
+        - "type"
+        - "label"
+        - "required"
+        - "description"
       properties:
         name:
-          type: string
+          type: "string"
           description: "Unique key for the field."
         type:
-          type: string
+          type: "string"
           description: "Data type for the field."
         label:
-          type: string
+          type: "string"
           description: "Display label for the field."
         required:
-          type: boolean
+          type: "boolean"
           description: "Whether the field is required."
         description:
-          type: string
+          type: "string"
           description: "Detailed description of the field."
         format:
-          type: string
+          type: "string"
           description: "Optional format information (e.g., date-long)."
           nullable: true
         max_length:
-          type: integer
+          type: "integer"
           description: "Optional maximum length."
           nullable: true
         example:
-          type: string
+          type: "string"
           description: "An example value for the field."
     CountrySpecificFieldDefinition:
       allOf:
         - $ref: "#/components/schemas/FieldDefinition"
-        - type: object
+        - type: "object"
           properties:
             applicable_countries:
-              type: array
+              type: "array"
               description: "List of ISO country codes where this field is applicable."
               items:
-                type: string
+                type: "string"
               example: ["BR", "UY", "ES", "IT"]
     EmployeeSyncFieldDefinitionsGeneric:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           description: "The employee sync field category (non-country-specific)."
           enum:
             - "job_info"
@@ -1000,7 +998,7 @@ components:
             - "custom_info"
             - "third_party_custom_info"
         fields:
-          type: array
+          type: "array"
           description: "Detailed definitions for each field in the category."
           items:
             $ref: "#/components/schemas/FieldDefinition"
@@ -1028,18 +1026,18 @@ components:
             description: "The state where the employee is located."
             example: "California"
     EmployeeSyncFieldDefinitionsCountrySpecific:
-      type: object
+      type: "object"
       required:
-        - category
-        - fields
+        - "category"
+        - "fields"
       properties:
         category:
-          type: string
+          type: "string"
           description: "The employee sync field category for country-specific information."
           enum:
             - "country_specific_info"
         fields:
-          type: array
+          type: "array"
           description: "Detailed definitions for each field in the country-specific category."
           items:
             $ref: "#/components/schemas/CountrySpecificFieldDefinition"
@@ -1067,35 +1065,35 @@ components:
     # 6) Fixed Field Key Enums for Each Category
     # ---------------------------------------------------
     JobInfoFields:
-      type: string
+      type: "string"
       description: "Allowed field keys for job_info."
       enum:
         - "job_title"
         - "job_info_effective_date"
         - "state"
     PersonalInfoFields:
-      type: string
+      type: "string"
       description: "Allowed field keys for personal_info."
       enum:
         - "first_name"
         - "last_name"
         - "city"
     WorkInfoFields:
-      type: string
+      type: "string"
       description: "Allowed field keys for work_info."
       enum:
         - "email"
         - "start_date"
         - "fte"
     CompensationInfoFields:
-      type: string
+      type: "string"
       description: "Allowed field keys for compensation_info."
       enum:
         - "pay_rate"
         - "pay_rate_time_frame"
         - "compensation_effective_date"
     EmploymentInfoFields:
-      type: string
+      type: "string"
       description: "Allowed field keys for employment_info."
       enum:
         - "employment_type"
