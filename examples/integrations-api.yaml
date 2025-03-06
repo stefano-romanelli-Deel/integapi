@@ -22,6 +22,8 @@ tags:
     description: 'Operations related to integration management.'
   - name: 'Employee Sync'
     description: 'Operations for retrieving employee sync field definitions.'
+  - name: 'Use Cases'
+    description: 'Operations for retrieving detailed use case information.'
 paths:
   /integrations:
     post:
@@ -142,6 +144,52 @@ paths:
                         - 'JP'
         '400':
           description: 'Bad Request – the provided country parameter is invalid.'
+  /use_cases:
+    get:
+      tags:
+        - 'Use Cases'
+      summary: 'Retrieve detailed use case information'
+      operationId: 'listUseCases'
+      parameters:
+        - name: 'use_case'
+          in: query
+          description: >
+            Optional use case name (e.g. 'employee_onboarding') to filter the results.
+          required: false
+          schema:
+            type: string
+            enum: ['employee_onboarding', 'payroll_processing', 'time_tracking', 'benefits_management', 'vendor_management']
+      responses:
+        '200':
+          description: 'Detailed use case information.'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UseCaseDetail'
+              example:
+                - use_case: 'employee_onboarding'
+                  sync_direction: 'inbound'
+                  notes:
+                    - 'Detailed onboarding note 1'
+                    - 'Detailed onboarding note 2'
+                  requirements:
+                    - category: 'software'
+                      content:
+                        - 'Must have HR module enabled.'
+                        - 'Requires API credentials.'
+                - use_case: 'payroll_processing'
+                  sync_direction: 'outbound'
+                  notes:
+                    - 'Detailed payroll processing note'
+                  requirements:
+                    - category: 'software'
+                      content:
+                        - 'Requires latest payroll data export.'
+                        - 'Must comply with local tax regulations.'
+        '400':
+          description: 'Bad Request – the provided parameters are invalid.'
 components:
   securitySchemes:
     apiKeyAuth:
@@ -253,14 +301,15 @@ components:
                     fields: ['job_title', 'job_info_effective_date']
             use_cases:
               - use_case: 'employee_onboarding'
-                sync_direction: 'inbound'
-                notes:
-                  - 'Notes specific to onboarding with Netsuite.'
-                requirements:
-                  - category: 'software'
-                    content:
-                      - 'Must have HR module enabled.'
-                      - 'Requires API credentials.'
+                more_info:
+                  method: 'GET'
+                  url: '/use_cases?use_case=employee_onboarding'
+                  description: 'Retrieve detailed info for employee_onboarding.'
+              - use_case: 'payroll_processing'
+                more_info:
+                  method: 'GET'
+                  url: '/use_cases?use_case=payroll_processing'
+                  description: 'Retrieve detailed info for payroll_processing.'
         requirements:
           - category: 'software'
             content:
@@ -314,9 +363,9 @@ components:
             $ref: '#/components/schemas/Category'
         use_cases:
           type: array
-          description: 'List of use cases for the product line.'
+          description: 'List of use cases for the product line (minimal info).'
           items:
-            $ref: '#/components/schemas/UseCase'
+            $ref: '#/components/schemas/UseCaseRef'
       example:
         line: 'global_payroll'
         sync_types:
@@ -336,14 +385,15 @@ components:
         categories: ['accounting', 'automation']
         use_cases:
           - use_case: 'employee_onboarding'
-            sync_direction: 'inbound'
-            notes:
-              - 'Notes specific to onboarding with Netsuite.'
-            requirements:
-              - category: 'software'
-                content:
-                  - 'Must have HR module enabled.'
-                  - 'Requires API credentials.'
+            more_info:
+              method: 'GET'
+              url: '/use_cases?use_case=employee_onboarding'
+              description: 'Retrieve detailed info for employee_onboarding.'
+          - use_case: 'payroll_processing'
+            more_info:
+              method: 'GET'
+              url: '/use_cases?use_case=payroll_processing'
+              description: 'Retrieve detailed info for payroll_processing.'
     ProductLine:
       type: string
       description: 'Available product lines.'
@@ -379,7 +429,43 @@ components:
       example:
         category: 'software'
         content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
-    UseCase:
+    UseCaseRef:
+      type: object
+      required:
+        - use_case
+        - more_info
+      properties:
+        use_case:
+          type: string
+          description: 'The use case name.'
+          example: 'employee_onboarding'
+          enum:
+            - 'employee_onboarding'
+            - 'payroll_processing'
+            - 'time_tracking'
+            - 'benefits_management'
+            - 'vendor_management'
+        more_info:
+          $ref: '#/components/schemas/UseCaseLink'
+    UseCaseLink:
+      type: object
+      required:
+        - method
+        - url
+      properties:
+        method:
+          type: string
+          description: 'HTTP method to retrieve detailed use case info.'
+          example: 'GET'
+        url:
+          type: string
+          description: 'Relative URL to fetch detailed use case info.'
+          example: '/use_cases?use_case=employee_onboarding'
+        description:
+          type: string
+          description: 'A brief description of the link.'
+          example: 'Retrieve detailed info for the use case.'
+    UseCaseDetail:
       type: object
       required:
         - use_case
@@ -405,7 +491,8 @@ components:
         use_case: 'employee_onboarding'
         sync_direction: 'inbound'
         notes:
-          - 'Notes specific to onboarding with Netsuite.'
+          - 'Detailed onboarding note 1'
+          - 'Detailed onboarding note 2'
         requirements:
           - category: 'software'
             content:
