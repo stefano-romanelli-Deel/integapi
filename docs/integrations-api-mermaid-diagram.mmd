@@ -2,13 +2,12 @@ flowchart TD
   %% Integration node and its properties
   subgraph Integration[Integration]
     A1["ID<br>(Unique integration ID)<br><code>12345</code>"]
-    A2["Third Party Software<br>(Software connected)<br><code>netsuite</code>"]
+    A2["Third Party Software<br>(Connected Software)<br><code>netsuite</code>"]
     A3["Display Name<br>(Human-readable name)<br><code>NetSuite 2.0</code>"]
     A4["Deprecated<br>(Active flag)<br><code>false</code>"]
     A5["Categories<br>(Integration categories)<br><code>[accounting, automation]</code>"]
     A6["Product Lines"]
-    A7["Prerequisites"]
-    A8["Use Cases"]
+    A7["Requirements<br>(Integration requirements)<br><code>software: req1, req2</code>"]
   end
 
   Integration --> A1
@@ -18,16 +17,28 @@ flowchart TD
   Integration --> A5
   Integration --> A6
   Integration --> A7
-  Integration --> A8
+
+  %% Integration Requirements subgraph
+  subgraph IR [Requirements]
+    F1["Requirement Type<br>(e.g., software)"]
+    F2["Content<br><code>req1, req2, req3</code>"]
+  end
+  A7 --> IR
+  IR --> F1
+  IR --> F2
 
   %% Product Lines subgraph
   subgraph PL [Product Lines]
     B1["Product Line<br>(Identifier)<br><code>global_payroll</code>"]
-    B2["Sync Types"]
+    B2["Categories<br>(Product line categories)<br><code>[accounting, automation]</code>"]
+    B3["Sync Types"]
+    B4["Use Cases<br>(Use case names)<br><code>[employee_onboarding, payroll_processing]</code>"]
   end
   A6 --> PL
   PL --> B1
   PL --> B2
+  PL --> B3
+  PL --> B4
 
   %% Sync Types subgraph
   subgraph ST [Sync Types]
@@ -36,15 +47,26 @@ flowchart TD
     C3["Standalone<br>(Operates independently?)<br><code>true</code>"]
     C4["Depends On<br>(Dependencies)<br><code>[]</code>"]
     C5["Where Set Up<br>(Setup location)<br><code>employee_sync_plugin</code>"]
-    C6["Sync Data<br>(Selected data fields)"]
+    C6["Requirements<br>(Sync type requirements)<br><code>software: reqA; permissions: reqB</code>"]
+    C7["Sync Data<br>(Selected data fields)"]
   end
-  B2 --> ST
+  B3 --> ST
   ST --> C1
   ST --> C2
   ST --> C3
   ST --> C4
   ST --> C5
   ST --> C6
+  ST --> C7
+
+  %% Sync Type Requirements subgraph
+  subgraph STR [Sync Type Requirements]
+    R1["Requirement Type<br>(e.g., software)"]
+    R2["Content<br><code>reqA, reqB</code>"]
+  end
+  C6 --> STR
+  STR --> R1
+  STR --> R2
 
   %% Sync Data subgraph
   subgraph SD [Sync Data]
@@ -56,10 +78,10 @@ flowchart TD
     D6["Cost Centers<br>(Fields: cost_center_code, cost_center_name)"]
     D7["Country Specific Info"]
     D8["Bank Info<br>(Fields: bank_account_number, bank_name)"]
-    D9["Custom Info<br>(Field: custom_field_1)"]
-    D10["Third Party Custom Info<br>(Field: third_party_field_1)"]
+    D9["Custom Info<br>(Fields: custom_field_1, custom_field_2)"]
+    D10["Third Party Custom Info<br>(Fields: third_party_field_1, third_party_field_2)"]
   end
-  C6 --> SD
+  C7 --> SD
   SD --> D1
   SD --> D2
   SD --> D3
@@ -84,24 +106,11 @@ flowchart TD
   CSI --> E3
   CSI --> E4
 
-  %% Expand Prerequisites
-  subgraph PR [Prerequisites]
-    F1["Prerequisite Type<br>(e.g., software)"]
-    F2["Content<br><code>req1, req2, req3</code>"]
+  %% Product Line Use Cases subgraph (minimal use case references)
+  subgraph UC_Min [Use Cases]
+    U1["Use Case Name<br>(e.g., employee_onboarding)"]
+    U2["Use Case Name<br>(e.g., payroll_processing)"]
   end
-  A7 --> PR
-  PR --> F1
-  PR --> F2
-
-  %% Expand Use Cases
-  subgraph UC [Use Cases]
-    G1["Use Case Name<br>(e.g., employee_onboarding)"]
-    G2["Sync Direction<br>(e.g., inbound)"]
-    G3["Notes<br><code>onboarding notes</code>"]
-    G4["Requirements<br><code>HR module, API credentials</code>"]
-  end
-  A8 --> UC
-  UC --> G1
-  UC --> G2
-  UC --> G3
-  UC --> G4
+  B4 --> UC_Min
+  UC_Min --> U1
+  UC_Min --> U2
