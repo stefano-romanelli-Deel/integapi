@@ -229,30 +229,6 @@ components:
           example:
             - category: 'software'
               content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
-        use_cases:
-          type: array
-          description: 'List of use cases for the integration.'
-          items:
-            $ref: '#/components/schemas/UseCase'
-          example:
-            - use_case: 'employee_onboarding'
-              sync_direction: 'inbound'
-              notes:
-                - 'Notes specific to onboarding with Netsuite.'
-              requirements:
-                - category: 'software'
-                  content:
-                    - 'Must have HR module enabled.'
-                    - 'Requires API credentials.'
-            - use_case: 'payroll_processing'
-              sync_direction: 'outbound'
-              notes:
-                - 'Payroll processing notes for this integration.'
-              requirements:
-                - category: 'software'
-                  content:
-                    - 'Requires latest payroll data export.'
-                    - 'Must comply with local tax regulations.'
       example:
         id: '12345'
         third_party_software: 'netsuite'
@@ -275,31 +251,22 @@ components:
                     fields: ['first_name', 'last_name', 'city']
                   - category: 'job_info'
                     fields: ['job_title', 'job_info_effective_date']
+            use_cases:
+              - use_case: 'employee_onboarding'
+                sync_direction: 'inbound'
+                notes:
+                  - 'Notes specific to onboarding with Netsuite.'
+                requirements:
+                  - category: 'software'
+                    content:
+                      - 'Must have HR module enabled.'
+                      - 'Requires API credentials.'
         requirements:
           - category: 'software'
             content:
               - 'This is a requirement one'
               - 'This is a requirement two'
               - 'This is a requirement three'
-        use_cases:
-          - use_case: 'employee_onboarding'
-            sync_direction: 'inbound'
-            notes:
-              - 'Notes specific to onboarding with Netsuite.'
-            requirements:
-              - category: 'software'
-                content:
-                  - 'Must have HR module enabled.'
-                  - 'Requires API credentials.'
-          - use_case: 'payroll_processing'
-            sync_direction: 'outbound'
-            notes:
-              - 'Payroll processing notes for this integration.'
-            requirements:
-              - category: 'software'
-                content:
-                  - 'Requires latest payroll data export.'
-                  - 'Must comply with local tax regulations.'
     Category:
       type: string
       description: 'A category this integration belongs to.'
@@ -345,6 +312,38 @@ components:
           description: 'Categories associated with this product line.'
           items:
             $ref: '#/components/schemas/Category'
+        use_cases:
+          type: array
+          description: 'List of use cases for the product line.'
+          items:
+            $ref: '#/components/schemas/UseCase'
+      example:
+        line: 'global_payroll'
+        sync_types:
+          - type: 'employee_data'
+            techs: ['api_open', 'sftp']
+            standalone: true
+            depends_on: ['employee_data']
+            where_set_up: 'employee_sync_plugin'
+            requirements:
+              - category: 'software'
+                content: ['Requires integration module', 'API credentials needed']
+            sync_data:
+              - category: 'personal_info'
+                fields: ['first_name', 'last_name', 'city']
+              - category: 'job_info'
+                fields: ['job_title', 'job_info_effective_date']
+        categories: ['accounting', 'automation']
+        use_cases:
+          - use_case: 'employee_onboarding'
+            sync_direction: 'inbound'
+            notes:
+              - 'Notes specific to onboarding with Netsuite.'
+            requirements:
+              - category: 'software'
+                content:
+                  - 'Must have HR module enabled.'
+                  - 'Requires API credentials.'
     ProductLine:
       type: string
       description: 'Available product lines.'
@@ -429,7 +428,7 @@ components:
         vendor_management: 'Use case for managing vendor relationships.'
 
     # ---------------------------------------------------
-    # 2) Sync Type, Technologies, Where Set Up, and Directions
+    # 2) Sync Type, Technologies, Where Set Up, Directions, and Requirements
     # ---------------------------------------------------
     SyncType:
       type: object
