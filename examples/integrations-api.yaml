@@ -161,6 +161,7 @@ components:
         - deprecated
         - categories
         - product_lines
+        - requirements
       properties:
         id:
           type: string
@@ -220,27 +221,14 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ProductLines'
-        prerequisites:
+        requirements:
           type: array
-          description: 'List of prerequisites for the integration, organized by category.'
+          description: 'List of requirements for the integration.'
           items:
-            $ref: '#/components/schemas/Prerequisite'
+            $ref: '#/components/schemas/Requirement'
           example:
             - category: 'software'
-              content:
-                - 'This is a requirement one'
-                - 'This is a requirement two'
-                - 'This is a requirement three'
-            - category: 'pricing'
-              content:
-                - 'This is a requirement one'
-                - 'This is a requirement two'
-                - 'This is a requirement three'
-            - category: 'expertise'
-              content:
-                - 'This is a requirement one'
-                - 'This is a requirement two'
-                - 'This is a requirement three'
+              content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
         use_cases:
           type: array
           description: 'List of use cases for the integration.'
@@ -252,15 +240,66 @@ components:
               notes:
                 - 'Notes specific to onboarding with Netsuite.'
               requirements:
-                - 'Must have HR module enabled.'
-                - 'Requires API credentials.'
+                - category: 'software'
+                  content:
+                    - 'Must have HR module enabled.'
+                    - 'Requires API credentials.'
             - use_case: 'payroll_processing'
               sync_direction: 'outbound'
               notes:
                 - 'Payroll processing notes for this integration.'
               requirements:
-                - 'Requires latest payroll data export.'
-                - 'Must comply with local tax regulations.'
+                - category: 'software'
+                  content:
+                    - 'Requires latest payroll data export.'
+                    - 'Must comply with local tax regulations.'
+      example:
+        id: '12345'
+        third_party_software: 'netsuite'
+        display_name: 'NetSuite 2.0'
+        deprecated: false
+        categories: ['accounting', 'automation']
+        product_lines:
+          - line: 'global_payroll'
+            sync_types:
+              - type: 'employee_data'
+                techs: ['api_open', 'sftp']
+                standalone: true
+                depends_on: ['employee_data']
+                where_set_up: 'employee_sync_plugin'
+                requirements:
+                  - category: 'software'
+                    content: ['Requires integration module', 'API credentials needed']
+                sync_data:
+                  - category: 'personal_info'
+                    fields: ['first_name', 'last_name', 'city']
+                  - category: 'job_info'
+                    fields: ['job_title', 'job_info_effective_date']
+        requirements:
+          - category: 'software'
+            content:
+              - 'This is a requirement one'
+              - 'This is a requirement two'
+              - 'This is a requirement three'
+        use_cases:
+          - use_case: 'employee_onboarding'
+            sync_direction: 'inbound'
+            notes:
+              - 'Notes specific to onboarding with Netsuite.'
+            requirements:
+              - category: 'software'
+                content:
+                  - 'Must have HR module enabled.'
+                  - 'Requires API credentials.'
+          - use_case: 'payroll_processing'
+            sync_direction: 'outbound'
+            notes:
+              - 'Payroll processing notes for this integration.'
+            requirements:
+              - category: 'software'
+                content:
+                  - 'Requires latest payroll data export.'
+                  - 'Must comply with local tax regulations.'
     Category:
       type: string
       description: 'A category this integration belongs to.'
@@ -318,28 +357,29 @@ components:
         - 'us_payroll'
         - 'deel_it'
         - 'deel_hr'
-    PrerequisiteType:
-      type: string
-      description: 'The type of prerequisite required for an integration setup.'
-      enum:
-        - 'software'
-        - 'permissions'
-        - 'expertise'
-        - 'pricing'
-      example: 'permissions'
-    Prerequisite:
+    Requirement:
       type: object
       required:
         - category
         - content
       properties:
         category:
-          $ref: '#/components/schemas/PrerequisiteType'
+          type: string
+          description: 'The type of requirement.'
+          enum:
+            - 'software'
+            - 'permissions'
+            - 'expertise'
+            - 'pricing'
+          example: 'software'
         content:
           type: array
-          description: 'Short text strings describing the requirement.'
+          description: 'List of requirement texts.'
           items:
             type: string
+      example:
+        category: 'software'
+        content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
     UseCase:
       type: object
       required:
@@ -359,9 +399,19 @@ components:
             type: string
         requirements:
           type: array
-          description: 'A list of open string requirements for the use case.'
+          description: 'List of requirements for the use case.'
           items:
-            type: string
+            $ref: '#/components/schemas/Requirement'
+      example:
+        use_case: 'employee_onboarding'
+        sync_direction: 'inbound'
+        notes:
+          - 'Notes specific to onboarding with Netsuite.'
+        requirements:
+          - category: 'software'
+            content:
+              - 'Must have HR module enabled.'
+              - 'Requires API credentials.'
     UseCaseEnum:
       type: string
       description: 'Allowed use cases for integrations.'
@@ -389,6 +439,7 @@ components:
         - standalone
         - where_set_up
         - sync_data
+        - requirements
       properties:
         type:
           $ref: '#/components/schemas/SyncTypeEnum'
@@ -408,6 +459,11 @@ components:
             $ref: '#/components/schemas/SyncTypeEnum'
         where_set_up:
           $ref: '#/components/schemas/WhereSetUpEnum'
+        requirements:
+          type: array
+          description: 'List of requirements for the sync type.'
+          items:
+            $ref: '#/components/schemas/Requirement'
         sync_data:
           type: array
           description: >
@@ -431,6 +487,9 @@ components:
         standalone: true
         depends_on: ['employee_data']
         where_set_up: 'employee_sync_plugin'
+        requirements:
+          - category: 'software'
+            content: ['Requires integration module', 'API credentials needed']
         sync_data:
           - category: 'personal_info'
             fields: ['first_name', 'last_name', 'city']
