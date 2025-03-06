@@ -183,6 +183,7 @@ paths:
                   sync_direction: 'outbound'
                   notes:
                     - 'Detailed payroll processing note'
+                    - 'Additional payroll note'
                   requirements:
                     - category: 'software'
                       content:
@@ -266,9 +267,68 @@ components:
         product_lines:
           type: array
           description: 'Product lines supported by this integration.'
-          minItems: 1
+          minItems: 2
           items:
             $ref: '#/components/schemas/ProductLines'
+          example:
+            - line: 'global_payroll'
+              sync_types:
+                - type: 'employee_data'
+                  techs: ['api_open', 'sftp']
+                  standalone: true
+                  depends_on: ['employee_data']
+                  where_set_up: 'employee_sync_plugin'
+                  requirements:
+                    - category: 'software'
+                      content: ['Requires integration module', 'API credentials needed']
+                    - category: 'permissions'
+                      content: ['User must have admin rights', 'Manager approval required']
+                  sync_data:
+                    - category: 'personal_info'
+                      fields: ['first_name', 'last_name', 'city']
+                    - category: 'job_info'
+                      fields: ['job_title', 'job_info_effective_date']
+              categories: ['accounting', 'automation']
+              use_cases:
+                - use_case: 'employee_onboarding'
+                  more_info:
+                    method: 'GET'
+                    url: '/use_cases?use_case=employee_onboarding'
+                    description: 'Retrieve detailed info for employee_onboarding.'
+                - use_case: 'payroll_processing'
+                  more_info:
+                    method: 'GET'
+                    url: '/use_cases?use_case=payroll_processing'
+                    description: 'Retrieve detailed info for payroll_processing.'
+            - line: 'us_payroll'
+              sync_types:
+                - type: 'employee_data'
+                  techs: ['api_open', 'sftp']
+                  standalone: true
+                  depends_on: ['employee_data']
+                  where_set_up: 'employee_sync_plugin'
+                  requirements:
+                    - category: 'software'
+                      content: ['Requires US payroll module', 'API key required']
+                    - category: 'permissions'
+                      content: ['User must have payroll rights', 'Manager approval required']
+                  sync_data:
+                    - category: 'personal_info'
+                      fields: ['first_name', 'last_name', 'city']
+                    - category: 'job_info'
+                      fields: ['job_title', 'job_info_effective_date']
+              categories: ['accounting', 'time_tracking']
+              use_cases:
+                - use_case: 'time_tracking'
+                  more_info:
+                    method: 'GET'
+                    url: '/use_cases?use_case=time_tracking'
+                    description: 'Retrieve detailed info for time_tracking.'
+                - use_case: 'benefits_management'
+                  more_info:
+                    method: 'GET'
+                    url: '/use_cases?use_case=benefits_management'
+                    description: 'Retrieve detailed info for benefits_management.'
         requirements:
           type: array
           description: 'List of requirements for the integration.'
@@ -276,7 +336,9 @@ components:
             $ref: '#/components/schemas/Requirement'
           example:
             - category: 'software'
-              content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
+              content: ['This is a requirement one', 'This is a requirement two']
+            - category: 'permissions'
+              content: ['User must have admin rights', 'Consent required']
       example:
         id: '12345'
         third_party_software: 'netsuite'
@@ -294,11 +356,14 @@ components:
                 requirements:
                   - category: 'software'
                     content: ['Requires integration module', 'API credentials needed']
+                  - category: 'permissions'
+                    content: ['User must have admin rights', 'Manager approval required']
                 sync_data:
                   - category: 'personal_info'
                     fields: ['first_name', 'last_name', 'city']
                   - category: 'job_info'
                     fields: ['job_title', 'job_info_effective_date']
+            categories: ['accounting', 'automation']
             use_cases:
               - use_case: 'employee_onboarding'
                 more_info:
@@ -310,12 +375,40 @@ components:
                   method: 'GET'
                   url: '/use_cases?use_case=payroll_processing'
                   description: 'Retrieve detailed info for payroll_processing.'
+          - line: 'us_payroll'
+            sync_types:
+              - type: 'employee_data'
+                techs: ['api_open', 'sftp']
+                standalone: true
+                depends_on: ['employee_data']
+                where_set_up: 'employee_sync_plugin'
+                requirements:
+                  - category: 'software'
+                    content: ['Requires US payroll module', 'API key required']
+                  - category: 'permissions'
+                    content: ['User must have payroll rights', 'Manager approval required']
+                sync_data:
+                  - category: 'personal_info'
+                    fields: ['first_name', 'last_name', 'city']
+                  - category: 'job_info'
+                    fields: ['job_title', 'job_info_effective_date']
+            categories: ['accounting', 'time_tracking']
+            use_cases:
+              - use_case: 'time_tracking'
+                more_info:
+                  method: 'GET'
+                  url: '/use_cases?use_case=time_tracking'
+                  description: 'Retrieve detailed info for time_tracking.'
+              - use_case: 'benefits_management'
+                more_info:
+                  method: 'GET'
+                  url: '/use_cases?use_case=benefits_management'
+                  description: 'Retrieve detailed info for benefits_management.'
         requirements:
           - category: 'software'
-            content:
-              - 'This is a requirement one'
-              - 'This is a requirement two'
-              - 'This is a requirement three'
+            content: ['This is a requirement one', 'This is a requirement two']
+          - category: 'permissions'
+            content: ['User must have admin rights', 'Consent required']
     Category:
       type: string
       description: 'A category this integration belongs to.'
@@ -379,6 +472,8 @@ components:
             requirements:
               - category: 'software'
                 content: ['Requires integration module', 'API credentials needed']
+              - category: 'permissions'
+                content: ['User must have admin rights', 'Manager approval required']
             sync_data:
               - category: 'personal_info'
                 fields: ['first_name', 'last_name', 'city']
@@ -430,7 +525,7 @@ components:
             type: string
       example:
         category: 'software'
-        content: ['This is a requirement one', 'This is a requirement two', 'This is a requirement three']
+        content: ['This is a requirement one', 'This is a requirement two']
     UseCaseRef:
       type: object
       required:
@@ -552,6 +647,11 @@ components:
           description: 'List of requirements for the sync type.'
           items:
             $ref: '#/components/schemas/Requirement'
+          example:
+            - category: 'software'
+              content: ['Requires integration module', 'API credentials needed']
+            - category: 'permissions'
+              content: ['User must have admin rights', 'Manager approval required']
         sync_data:
           type: array
           description: >
@@ -569,20 +669,22 @@ components:
               - $ref: '#/components/schemas/BankInfo'
               - $ref: '#/components/schemas/CustomInfo'
               - $ref: '#/components/schemas/ThirdPartyCustomInfo'
-      example:
-        type: 'employee_data'
-        techs: ['api_open', 'sftp']
-        standalone: true
-        depends_on: ['employee_data']
-        where_set_up: 'employee_sync_plugin'
-        requirements:
-          - category: 'software'
-            content: ['Requires integration module', 'API credentials needed']
-        sync_data:
-          - category: 'personal_info'
-            fields: ['first_name', 'last_name', 'city']
-          - category: 'job_info'
-            fields: ['job_title', 'job_info_effective_date']
+          example:
+            type: 'employee_data'
+            techs: ['api_open', 'sftp']
+            standalone: true
+            depends_on: ['employee_data']
+            where_set_up: 'employee_sync_plugin'
+            requirements:
+              - category: 'software'
+                content: ['Requires integration module', 'API credentials needed']
+              - category: 'permissions'
+                content: ['User must have admin rights', 'Manager approval required']
+            sync_data:
+              - category: 'personal_info'
+                fields: ['first_name', 'last_name', 'city']
+              - category: 'job_info'
+                fields: ['job_title', 'job_info_effective_date']
     SyncTypeEnum:
       type: string
       description: 'Available sync types.'
@@ -789,7 +891,7 @@ components:
             enum: ['bank_account_number', 'bank_routing_number', 'bank_name']
       example:
         category: 'bank_info'
-        fields: ['bank_account_number', 'bank_name']
+        fields: ['bank_account_number', 'bank_routing_number']
     CustomInfo:
       type: object
       required:
@@ -808,7 +910,7 @@ components:
             enum: ['custom_field_1', 'custom_field_2']
       example:
         category: 'custom_info'
-        fields: ['custom_field_1']
+        fields: ['custom_field_1', 'custom_field_2']
     ThirdPartyCustomInfo:
       type: object
       required:
@@ -827,7 +929,7 @@ components:
             enum: ['third_party_field_1', 'third_party_field_2']
       example:
         category: 'third_party_custom_info'
-        fields: ['third_party_field_1']
+        fields: ['third_party_field_1', 'third_party_field_2']
 
     # ---------------------------------------------------
     # 5) /employee_sync/fields Detailed Field Definitions
