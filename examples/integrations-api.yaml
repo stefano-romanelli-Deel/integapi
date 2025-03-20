@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: "3.0.3"
 info:
   title: "Integration API"
   version: "1.0.0"
@@ -179,6 +179,9 @@ paths:
                       content:
                         - "Must have HR module enabled."
                         - "Requires API credentials."
+                    - category: "permissions"
+                      content:
+                        - "User must have admin rights."
                 - use_case: "payroll_processing"
                   sync_direction: "outbound"
                   notes:
@@ -189,6 +192,9 @@ paths:
                       content:
                         - "Requires latest payroll data export."
                         - "Must comply with local tax regulations."
+                    - category: "expertise"
+                      content:
+                        - "Requires financial expertise."
         "400":
           description: "Bad Request – the provided parameters are invalid."
 components:
@@ -211,6 +217,7 @@ components:
         - "categories"
         - "product_lines"
         - "requirements"
+        - "business_lines"
       properties:
         id:
           type: "string"
@@ -339,6 +346,24 @@ components:
               content: ["This is a requirement one", "This is a requirement two"]
             - category: "permissions"
               content: ["User must have admin rights", "Consent required"]
+        business_lines:
+          type: "array"
+          description: "Business lines associated with the integration, each with its own requirements."
+          items:
+            $ref: "#/components/schemas/BusinessLine"
+          example:
+            - name: "Corporate"
+              requirements:
+                - category: "software"
+                  content: ["Requires corporate integration module"]
+                - category: "expertise"
+                  content: ["Requires certified specialist"]
+            - name: "SMB"
+              requirements:
+                - category: "pricing"
+                  content: ["Requires SMB pricing plan"]
+                - category: "permissions"
+                  content: ["User must have manager approval"]
       example:
         id: "12345"
         third_party_software: "netsuite"
@@ -409,6 +434,19 @@ components:
             content: ["This is a requirement one", "This is a requirement two"]
           - category: "permissions"
             content: ["User must have admin rights", "Consent required"]
+        business_lines:
+          - name: "Corporate"
+            requirements:
+              - category: "software"
+                content: ["Requires corporate integration module"]
+              - category: "expertise"
+                content: ["Requires certified specialist"]
+          - name: "SMB"
+            requirements:
+              - category: "pricing"
+                content: ["Requires SMB pricing plan"]
+              - category: "permissions"
+                content: ["User must have manager approval"]
     Category:
       type: "string"
       description: "A category this integration belongs to."
@@ -525,7 +563,29 @@ components:
             type: "string"
       example:
         category: "software"
-        content: ["This is a requirement one", "This is a requirement two"]
+        content: ["Integrates with ERP system", "Supports API-based data exchange"]
+    BusinessLine:
+      type: "object"
+      required:
+        - "name"
+        - "requirements"
+      properties:
+        name:
+          type: "string"
+          description: "The business line identifier."
+          example: "Corporate"
+        requirements:
+          type: "array"
+          description: "List of requirements for the business line."
+          items:
+            $ref: "#/components/schemas/Requirement"
+      example:
+        name: "Corporate"
+        requirements:
+          - category: "software"
+            content: ["Requires enterprise-grade integration module"]
+          - category: "expertise"
+            content: ["Requires certified integration specialist"]
     UseCaseRef:
       type: "object"
       required:
@@ -595,6 +655,9 @@ components:
             content:
               - "Must have HR module enabled."
               - "Requires API credentials."
+          - category: "permissions"
+            content:
+              - "User must have manager approval."
     UseCaseEnum:
       type: "string"
       description: "Allowed use cases for integrations."
