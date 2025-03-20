@@ -89,12 +89,6 @@ paths:
                       format: "date-long"
                       description: "The date when the current job title became effective."
                       example: "2023-01-01"
-                    - name: "state"
-                      type: "string"
-                      label: "State"
-                      required: false
-                      description: "The state where the employee is located."
-                      example: "California"
                 - category: "personal_info"
                   fields:
                     - name: "first_name"
@@ -174,6 +168,12 @@ paths:
                   notes:
                     - "Detailed onboarding note 1"
                     - "Detailed onboarding note 2"
+                  sync_types:
+                    - sync_type: "employee_data"
+                      more_info:
+                        method: "GET"
+                        url: "/sync_types?type=employee_data"
+                        description: "Retrieve detailed sync type info for employee_data."
                   requirements:
                     - category: "software"
                       content:
@@ -181,12 +181,18 @@ paths:
                         - "Requires API credentials."
                     - category: "permissions"
                       content:
-                        - "User must have admin rights."
+                        - "User must have manager approval."
                 - use_case: "payroll_processing"
                   sync_direction: "outbound"
                   notes:
                     - "Detailed payroll processing note"
                     - "Additional payroll note"
+                  sync_types:
+                    - sync_type: "payroll"
+                      more_info:
+                        method: "GET"
+                        url: "/sync_types?type=payroll"
+                        description: "Retrieve detailed sync type info for payroll."
                   requirements:
                     - category: "software"
                       content:
@@ -197,6 +203,47 @@ paths:
                         - "Requires financial expertise."
         "400":
           description: "Bad Request – the provided parameters are invalid."
+  /sync_types:
+    get:
+      tags:
+        - "Integrations"
+      summary: "List sync types"
+      operationId: "listSyncTypes"
+      parameters:
+        - name: "type"
+          in: "query"
+          description: "Optional sync type to filter by (e.g., employee_data)."
+          required: false
+          schema:
+            type: "string"
+            enum: ["employee_data", "time_off", "pay_slips", "otp", "invoices", "payments", "equity", "vendors", "gl_payroll_journal", "user_provisioning", "identity", "people_match"]
+      responses:
+        "200":
+          description: "List of sync types."
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/SyncType"
+              example:
+                - type: "employee_data"
+                  techs: ["api_open", "sftp"]
+                  standalone: true
+                  depends_on: []
+                  where_set_up: "employee_sync_plugin"
+                  requirements:
+                    - category: "software"
+                      content: ["Requires integration module", "API credentials needed"]
+                    - category: "permissions"
+                      content: ["User must have admin rights", "Manager approval required"]
+                  sync_data:
+                    - category: "personal_info"
+                      fields: ["first_name", "last_name", "city"]
+                    - category: "job_info"
+                      fields: ["job_title", "job_info_effective_date"]
+        "400":
+          description: "Bad Request – invalid sync type parameter."
 components:
   securitySchemes:
     apiKeyAuth:
@@ -204,9 +251,6 @@ components:
       in: "header"
       name: "X-API-Key"
   schemas:
-    # ---------------------------------------------------
-    # 1) Integration and Related Schemas
-    # ---------------------------------------------------
     Integration:
       type: "object"
       required:
@@ -279,22 +323,6 @@ components:
             $ref: "#/components/schemas/ProductLines"
           example:
             - line: "global_payroll"
-              sync_types:
-                - type: "employee_data"
-                  techs: ["api_open", "sftp"]
-                  standalone: true
-                  depends_on: ["employee_data"]
-                  where_set_up: "employee_sync_plugin"
-                  requirements:
-                    - category: "software"
-                      content: ["Requires integration module", "API credentials needed"]
-                    - category: "permissions"
-                      content: ["User must have admin rights", "Manager approval required"]
-                  sync_data:
-                    - category: "personal_info"
-                      fields: ["first_name", "last_name", "city"]
-                    - category: "job_info"
-                      fields: ["job_title", "job_info_effective_date"]
               categories: ["accounting", "automation"]
               use_cases:
                 - use_case: "employee_onboarding"
@@ -308,22 +336,6 @@ components:
                     url: "/use_cases?use_case=payroll_processing"
                     description: "Retrieve detailed info for payroll_processing."
             - line: "us_payroll"
-              sync_types:
-                - type: "employee_data"
-                  techs: ["api_open", "sftp"]
-                  standalone: true
-                  depends_on: ["employee_data"]
-                  where_set_up: "employee_sync_plugin"
-                  requirements:
-                    - category: "software"
-                      content: ["Requires US payroll module", "API key required"]
-                    - category: "permissions"
-                      content: ["User must have payroll rights", "Manager approval required"]
-                  sync_data:
-                    - category: "personal_info"
-                      fields: ["first_name", "last_name", "city"]
-                    - category: "job_info"
-                      fields: ["job_title", "job_info_effective_date"]
               categories: ["accounting", "time_tracking"]
               use_cases:
                 - use_case: "time_tracking"
@@ -355,9 +367,9 @@ components:
             - name: "Corporate"
               requirements:
                 - category: "software"
-                  content: ["Requires corporate integration module"]
+                  content: ["Requires enterprise integration module"]
                 - category: "expertise"
-                  content: ["Requires certified specialist"]
+                  content: ["Requires certified integration specialist"]
             - name: "SMB"
               requirements:
                 - category: "pricing"
@@ -372,22 +384,6 @@ components:
         categories: ["accounting", "automation"]
         product_lines:
           - line: "global_payroll"
-            sync_types:
-              - type: "employee_data"
-                techs: ["api_open", "sftp"]
-                standalone: true
-                depends_on: ["employee_data"]
-                where_set_up: "employee_sync_plugin"
-                requirements:
-                  - category: "software"
-                    content: ["Requires integration module", "API credentials needed"]
-                  - category: "permissions"
-                    content: ["User must have admin rights", "Manager approval required"]
-                sync_data:
-                  - category: "personal_info"
-                    fields: ["first_name", "last_name", "city"]
-                  - category: "job_info"
-                    fields: ["job_title", "job_info_effective_date"]
             categories: ["accounting", "automation"]
             use_cases:
               - use_case: "employee_onboarding"
@@ -401,22 +397,6 @@ components:
                   url: "/use_cases?use_case=payroll_processing"
                   description: "Retrieve detailed info for payroll_processing."
           - line: "us_payroll"
-            sync_types:
-              - type: "employee_data"
-                techs: ["api_open", "sftp"]
-                standalone: true
-                depends_on: ["employee_data"]
-                where_set_up: "employee_sync_plugin"
-                requirements:
-                  - category: "software"
-                    content: ["Requires US payroll module", "API key required"]
-                  - category: "permissions"
-                    content: ["User must have payroll rights", "Manager approval required"]
-                sync_data:
-                  - category: "personal_info"
-                    fields: ["first_name", "last_name", "city"]
-                  - category: "job_info"
-                    fields: ["job_title", "job_info_effective_date"]
             categories: ["accounting", "time_tracking"]
             use_cases:
               - use_case: "time_tracking"
@@ -438,15 +418,16 @@ components:
           - name: "Corporate"
             requirements:
               - category: "software"
-                content: ["Requires corporate integration module"]
+                content: ["Requires enterprise integration module"]
               - category: "expertise"
-                content: ["Requires certified specialist"]
+                content: ["Requires certified integration specialist"]
           - name: "SMB"
             requirements:
               - category: "pricing"
                 content: ["Requires SMB pricing plan"]
               - category: "permissions"
                 content: ["User must have manager approval"]
+
     Category:
       type: "string"
       description: "A category this integration belongs to."
@@ -473,22 +454,16 @@ components:
         - "itsm"
         - "hcm"
       example: "accounting"
+
     ProductLines:
       type: "object"
       required:
         - "type"
-        - "sync_types"
         - "categories"
         - "use_cases"
       properties:
         line:
           $ref: "#/components/schemas/ProductLine"
-        sync_types:
-          type: "array"
-          description: "List of sync types for this product line."
-          minItems: 1
-          items:
-            $ref: "#/components/schemas/SyncType"
         categories:
           type: "array"
           description: "Categories associated with this product line."
@@ -501,22 +476,6 @@ components:
             $ref: "#/components/schemas/UseCaseRef"
       example:
         line: "global_payroll"
-        sync_types:
-          - type: "employee_data"
-            techs: ["api_open", "sftp"]
-            standalone: true
-            depends_on: ["employee_data"]
-            where_set_up: "employee_sync_plugin"
-            requirements:
-              - category: "software"
-                content: ["Requires integration module", "API credentials needed"]
-              - category: "permissions"
-                content: ["User must have admin rights", "Manager approval required"]
-            sync_data:
-              - category: "personal_info"
-                fields: ["first_name", "last_name", "city"]
-              - category: "job_info"
-                fields: ["job_title", "job_info_effective_date"]
         categories: ["accounting", "automation"]
         use_cases:
           - use_case: "employee_onboarding"
@@ -529,6 +488,7 @@ components:
               method: "GET"
               url: "/use_cases?use_case=payroll_processing"
               description: "Retrieve detailed info for payroll_processing."
+
     ProductLine:
       type: "string"
       description: "Available product lines."
@@ -541,6 +501,7 @@ components:
         - "us_payroll"
         - "deel_it"
         - "deel_hr"
+
     Requirement:
       type: "object"
       required:
@@ -564,6 +525,7 @@ components:
       example:
         category: "software"
         content: ["Integrates with ERP system", "Supports API-based data exchange"]
+
     BusinessLine:
       type: "object"
       required:
@@ -586,6 +548,7 @@ components:
             content: ["Requires enterprise-grade integration module"]
           - category: "expertise"
             content: ["Requires certified integration specialist"]
+
     UseCaseRef:
       type: "object"
       required:
@@ -604,6 +567,7 @@ components:
             - "vendor_management"
         more_info:
           $ref: "#/components/schemas/UseCaseLink"
+
     UseCaseLink:
       type: "object"
       required:
@@ -622,6 +586,7 @@ components:
           type: "string"
           description: "A brief description of the link."
           example: "Retrieve detailed info for the use case."
+
     UseCaseDetail:
       type: "object"
       required:
@@ -629,6 +594,7 @@ components:
         - "sync_direction"
         - "notes"
         - "requirements"
+        - "sync_types"
       properties:
         use_case:
           $ref: "#/components/schemas/UseCaseEnum"
@@ -639,6 +605,11 @@ components:
           description: "A list of integration-specific notes for the use case."
           items:
             type: "string"
+        sync_types:
+          type: "array"
+          description: "List of sync types associated with the use case."
+          items:
+            $ref: "#/components/schemas/UseCaseSyncType"
         requirements:
           type: "array"
           description: "List of requirements for the use case."
@@ -650,6 +621,12 @@ components:
         notes:
           - "Detailed onboarding note 1"
           - "Detailed onboarding note 2"
+        sync_types:
+          - sync_type: "employee_data"
+            more_info:
+              method: "GET"
+              url: "/sync_types?type=employee_data"
+              description: "Retrieve detailed sync type info for employee_data."
         requirements:
           - category: "software"
             content:
@@ -658,6 +635,7 @@ components:
           - category: "permissions"
             content:
               - "User must have manager approval."
+
     UseCaseEnum:
       type: "string"
       description: "Allowed use cases for integrations."
@@ -673,9 +651,38 @@ components:
         time_tracking: "Use case for tracking time and attendance."
         benefits_management: "Use case for managing employee benefits."
         vendor_management: "Use case for managing vendor relationships."
-    # ---------------------------------------------------
-    # 2) Sync Type, Technologies, Where Set Up, Directions, and Requirements
-    # ---------------------------------------------------
+
+    UseCaseSyncType:
+      type: "object"
+      required:
+        - "sync_type"
+        - "more_info"
+      properties:
+        sync_type:
+          type: "string"
+          description: "The sync type associated with this use case."
+          enum:
+            - "employee_data"
+            - "time_off"
+            - "pay_slips"
+            - "otp"
+            - "invoices"
+            - "payments"
+            - "equity"
+            - "vendors"
+            - "gl_payroll_journal"
+            - "user_provisioning"
+            - "identity"
+            - "people_match"
+        more_info:
+          $ref: "#/components/schemas/UseCaseLink"
+      example:
+        sync_type: "employee_data"
+        more_info:
+          method: "GET"
+          url: "/sync_types?type=employee_data"
+          description: "Retrieve detailed sync type info for employee_data."
+
     SyncType:
       type: "object"
       required:
@@ -747,6 +754,7 @@ components:
                 fields: ["first_name", "last_name", "city"]
               - category: "job_info"
                 fields: ["job_title", "job_info_effective_date"]
+
     SyncTypeEnum:
       type: "string"
       description: "Available sync types."
@@ -763,6 +771,7 @@ components:
         - "user_provisioning"
         - "identity"
         - "people_match"
+
     SyncTechEnum:
       type: "string"
       description: "Technologies used to sync data."
@@ -771,6 +780,7 @@ components:
         - "api_graph"
         - "sftp"
         - "webhook"
+
     WhereSetUpEnum:
       type: "string"
       description: "The plugin or location where the sync is set up."
@@ -792,6 +802,7 @@ components:
         people_section: "The main \"People\" section of Deel, accessible from the main nav."
         vendor_match: "Vendor matching synchronization."
         payroll_section: "The main \"Payroll\" section of Deel, accessible from the main nav."
+
     SyncDirectionEnum:
       type: "string"
       description: "Specifies the data synchronization direction."
@@ -803,9 +814,7 @@ components:
         inbound: "Data flows from the third-party system to Deel."
         outbound: "Data flows from Deel to the third-party system."
         bidirectional: "Data flows in both directions."
-    # ---------------------------------------------------
-    # 3) Sync Data Selection Objects (One per Category)
-    # ---------------------------------------------------
+
     JobInfo:
       type: "object"
       required:
@@ -824,6 +833,7 @@ components:
       example:
         category: "job_info"
         fields: ["job_title", "job_info_effective_date"]
+
     PersonalInfo:
       type: "object"
       required:
@@ -842,6 +852,7 @@ components:
       example:
         category: "personal_info"
         fields: ["first_name", "last_name", "city"]
+
     WorkInfo:
       type: "object"
       required:
@@ -860,6 +871,7 @@ components:
       example:
         category: "work_info"
         fields: ["email", "start_date", "fte"]
+
     CompensationInfo:
       type: "object"
       required:
@@ -878,6 +890,7 @@ components:
       example:
         category: "compensation_info"
         fields: ["pay_rate", "pay_rate_time_frame"]
+
     EmploymentInfo:
       type: "object"
       required:
@@ -896,6 +909,7 @@ components:
       example:
         category: "employment_info"
         fields: ["employment_type", "employment_effective_date"]
+
     CostCenters:
       type: "object"
       required:
@@ -915,6 +929,7 @@ components:
       example:
         category: "cost_centers"
         fields: ["cost_center_code", "cost_center_name"]
+
     CountrySpecificInfo:
       type: "object"
       required:
@@ -934,6 +949,7 @@ components:
       example:
         category: "country_specific_info"
         fields: ["national_id", "tax_code"]
+
     BankInfo:
       type: "object"
       required:
@@ -953,6 +969,7 @@ components:
       example:
         category: "bank_info"
         fields: ["bank_account_number", "bank_routing_number"]
+
     CustomInfo:
       type: "object"
       required:
@@ -972,6 +989,7 @@ components:
       example:
         category: "custom_info"
         fields: ["custom_field_1", "custom_field_2"]
+
     ThirdPartyCustomInfo:
       type: "object"
       required:
@@ -992,9 +1010,6 @@ components:
         category: "third_party_custom_info"
         fields: ["third_party_field_1", "third_party_field_2"]
 
-    # ---------------------------------------------------
-    # 5) /employee_sync/fields Detailed Field Definitions
-    # ---------------------------------------------------
     FieldDefinition:
       type: "object"
       required:
@@ -1030,6 +1045,7 @@ components:
         example:
           type: "string"
           description: "An example value for the field."
+
     CountrySpecificFieldDefinition:
       allOf:
         - $ref: "#/components/schemas/FieldDefinition"
@@ -1041,6 +1057,7 @@ components:
               items:
                 type: "string"
               example: ["BR", "UY", "ES", "IT"]
+
     EmployeeSyncFieldDefinitionsGeneric:
       type: "object"
       required:
@@ -1088,6 +1105,7 @@ components:
             required: false
             description: "The state where the employee is located."
             example: "California"
+
     EmployeeSyncFieldDefinitionsCountrySpecific:
       type: "object"
       required:
@@ -1124,9 +1142,6 @@ components:
             example: "TAX1234"
             applicable_countries: ["GB", "JP"]
 
-    # ---------------------------------------------------
-    # 6) Fixed Field Key Enums for Each Category
-    # ---------------------------------------------------
     JobInfoFields:
       type: "string"
       description: "Allowed field keys for job_info."
