@@ -261,7 +261,6 @@ components:
         - "categories"
         - "product_lines"
         - "requirements"
-        - "business_lines"
       properties:
         id:
           type: "string"
@@ -358,24 +357,6 @@ components:
               content: ["This is a requirement one", "This is a requirement two"]
             - category: "permissions"
               content: ["User must have admin rights", "Consent required"]
-        business_lines:
-          type: "array"
-          description: "Business lines associated with the integration, each with its own requirements."
-          items:
-            $ref: "#/components/schemas/BusinessLine"
-          example:
-            - name: "Corporate"
-              requirements:
-                - category: "software"
-                  content: ["Requires enterprise integration module"]
-                - category: "expertise"
-                  content: ["Requires certified integration specialist"]
-            - name: "SMB"
-              requirements:
-                - category: "pricing"
-                  content: ["Requires SMB pricing plan"]
-                - category: "permissions"
-                  content: ["User must have manager approval"]
       example:
         id: "12345"
         third_party_software: "netsuite"
@@ -414,20 +395,6 @@ components:
             content: ["This is a requirement one", "This is a requirement two"]
           - category: "permissions"
             content: ["User must have admin rights", "Consent required"]
-        business_lines:
-          - name: "Corporate"
-            requirements:
-              - category: "software"
-                content: ["Requires enterprise integration module"]
-              - category: "expertise"
-                content: ["Requires certified integration specialist"]
-          - name: "SMB"
-            requirements:
-              - category: "pricing"
-                content: ["Requires SMB pricing plan"]
-              - category: "permissions"
-                content: ["User must have manager approval"]
-
     Category:
       type: "string"
       description: "A category this integration belongs to."
@@ -554,6 +521,8 @@ components:
       required:
         - "use_case"
         - "more_info"
+        - "requirements"
+        - "status"
       properties:
         use_case:
           type: "string"
@@ -567,7 +536,13 @@ components:
             - "vendor_management"
         more_info:
           $ref: "#/components/schemas/UseCaseLink"
-
+        requirements:
+          type: "array"
+          description: "List of requirements for the use case."
+          items:
+            $ref: "#/components/schemas/Requirement"
+        status:
+            $ref: "#/components/schemas/DevelopmentStatus"
     UseCaseLink:
       type: "object"
       required:
@@ -1177,3 +1152,14 @@ components:
         - "employment_type"
         - "employment_effective_date"
         - "termination_reason"
+    DevelopmentStatus:
+      type: "string"
+      description: "The development status of a use case or related item."
+      enum:
+        - "Won't Do"
+        - "Not Supported"
+        - "Planned"
+        - "In Development"
+        - "Beta"
+        - "Public"
+      example: "Planned"
