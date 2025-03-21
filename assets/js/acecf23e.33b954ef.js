@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkintegrations=self.webpackChunkintegrations||[]).push([[1903],{1912:t=>{t.exports=JSON.parse('{"blogBasePath":"/integapi/blog","blogTitle":"Blog","authorsListPath":"/integapi/blog/authors"}')}}]);
