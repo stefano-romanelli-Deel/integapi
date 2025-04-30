@@ -706,7 +706,7 @@
           },
           "use_cases": {
             "type": "array",
-            "description": "List of use cases for the product line (minimal info).",
+            "description": "List of use cases for the product line (minimal info). You can retrieve this info from the [Retrieve detailed use case information](https://stefano-romanelli-deel.github.io/integapi/docs/integrations/list-use-cases) endpoint.",
             "items": {
               "$ref": "#/components/schemas/UseCaseRef"
             }
