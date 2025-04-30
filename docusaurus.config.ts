@@ -245,7 +245,7 @@ const config: Config = {
         docsPluginId: "classic",
         config: {
           integrations: {
-            specPath: "examples/integrations-api.yaml",
+            specPath: "examples/integrations-api.json",
             outputDir: "docs/integrations",
             // downloadUrl:
             //   "https://raw.githubusercontent.com/PaloAltoNetworks/docusaurus-template-openapi-docs/main/examples/petstore.yaml",
