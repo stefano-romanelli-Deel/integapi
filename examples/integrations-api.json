@@ -1,0 +1,1800 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Integration API",
+    "version": "1.0.0",
+    "description": "API to manage integrations with third-party software. Fixed employee sync field definitions are available via the /employee_sync/fields endpoint. In the /integrations (POST) endpoint, users select which fixed fields are active by providing their keys under the sync_data array (which is a sub-property of each SyncType object). Each item in sync_data must be one of the defined selection objects.\n",
+    "license": {
+      "name": "Tralla",
+      "url": "www.example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Integrations",
+      "description": "Operations related to integration management."
+    },
+    {
+      "name": "Employee Sync",
+      "description": "Operations for retrieving employee sync field definitions."
+    },
+    {
+      "name": "Use Cases",
+      "description": "Operations for retrieving detailed use case information."
+    }
+  ],
+  "paths": {
+    "/integrations": {
+      "post": {
+        "tags": [
+          "Integrations"
+        ],
+        "summary": "Create an integration",
+        "operationId": "createIntegration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Integration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Integration created successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        }
+      }
+    },
+    "/employee_sync/fields": {
+      "get": {
+        "tags": [
+          "Employee Sync"
+        ],
+        "summary": "List data required for employee sync",
+        "operationId": "listEmployeeSyncData",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Optional ISO country code (e.g. \"BR\") to filter the field definitions. When provided, only fields required for that country (and, for country-specific categories, whose applicable_countries include the given code) are returned.\n",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns detailed employee sync field definitions grouped by category. If a country is specified, only fields required for that country are returned. Categories include: job_info, personal_info, work_info, compensation_info, employment_info, cost_centers, country_specific_info, bank_info, custom_info, and third_party_custom_info.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/EmployeeSyncFieldDefinitionsGeneric"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EmployeeSyncFieldDefinitionsCountrySpecific"
+                      }
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "category": "job_info",
+                    "fields": [
+                      {
+                        "name": "job_title",
+                        "type": "string",
+                        "label": "Job Title",
+                        "required": true,
+                        "description": "The official job title of the employee.",
+                        "max_length": 100,
+                        "example": "Software Engineer"
+                      },
+                      {
+                        "name": "job_info_effective_date",
+                        "type": "string",
+                        "label": "Job Info Effective Date",
+                        "required": true,
+                        "format": "date-long",
+                        "description": "The date when the current job title became effective.",
+                        "example": "2023-01-01"
+                      }
+                    ]
+                  },
+                  {
+                    "category": "personal_info",
+                    "fields": [
+                      {
+                        "name": "first_name",
+                        "type": "string",
+                        "label": "First Name",
+                        "required": true,
+                        "description": "The given name of the employee.",
+                        "max_length": 50,
+                        "example": "John"
+                      },
+                      {
+                        "name": "last_name",
+                        "type": "string",
+                        "label": "Last Name",
+                        "required": true,
+                        "description": "The surname of the employee.",
+                        "max_length": 50,
+                        "example": "Doe"
+                      },
+                      {
+                        "name": "city",
+                        "type": "string",
+                        "label": "City",
+                        "required": true,
+                        "description": "The city where the employee resides.",
+                        "max_length": 100,
+                        "example": "New York"
+                      }
+                    ]
+                  },
+                  {
+                    "category": "country_specific_info",
+                    "fields": [
+                      {
+                        "name": "national_id",
+                        "type": "string",
+                        "label": "National ID",
+                        "required": true,
+                        "description": "The national identification number required for employees in Brazil, Uruguay, Spain, and Italy.",
+                        "max_length": 50,
+                        "example": "123456789",
+                        "applicable_countries": [
+                          "BR",
+                          "UY",
+                          "ES",
+                          "IT"
+                        ]
+                      },
+                      {
+                        "name": "tax_code",
+                        "type": "string",
+                        "label": "Tax Code",
+                        "required": false,
+                        "description": "The tax identification code required for employees in United Kingdom and Japan.",
+                        "max_length": 50,
+                        "example": "TAX1234",
+                        "applicable_countries": [
+                          "GB",
+                          "JP"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request \u2013 the provided country parameter is invalid."
+          }
+        }
+      }
+    },
+    "/use_cases": {
+      "get": {
+        "tags": [
+          "Use Cases"
+        ],
+        "summary": "Retrieve detailed use case information",
+        "operationId": "listUseCases",
+        "parameters": [
+          {
+            "name": "use_case",
+            "in": "query",
+            "description": "Optional use case name (e.g. \"employee_onboarding\") to filter the results.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "employee_onboarding",
+                "payroll_processing",
+                "time_tracking",
+                "benefits_management",
+                "vendor_management"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed use case information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UseCaseDetail"
+                  }
+                },
+                "example": [
+                  {
+                    "use_case": "employee_onboarding",
+                    "sync_direction": "inbound",
+                    "notes": [
+                      "Detailed onboarding note 1",
+                      "Detailed onboarding note 2"
+                    ],
+                    "sync_types": [
+                      {
+                        "sync_type": "employee_data",
+                        "more_info": {
+                          "method": "GET",
+                          "url": "/sync_types?type=employee_data",
+                          "description": "Retrieve detailed sync type info for employee_data."
+                        }
+                      }
+                    ],
+                    "requirements": [
+                      {
+                        "category": "software",
+                        "content": [
+                          "Must have HR module enabled.",
+                          "Requires API credentials."
+                        ]
+                      },
+                      {
+                        "category": "permissions",
+                        "content": [
+                          "User must have manager approval."
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "use_case": "payroll_processing",
+                    "sync_direction": "outbound",
+                    "notes": [
+                      "Detailed payroll processing note",
+                      "Additional payroll note"
+                    ],
+                    "sync_types": [
+                      {
+                        "sync_type": "payroll",
+                        "more_info": {
+                          "method": "GET",
+                          "url": "/sync_types?type=payroll",
+                          "description": "Retrieve detailed sync type info for payroll."
+                        }
+                      }
+                    ],
+                    "requirements": [
+                      {
+                        "category": "software",
+                        "content": [
+                          "Requires latest payroll data export.",
+                          "Must comply with local tax regulations."
+                        ]
+                      },
+                      {
+                        "category": "expertise",
+                        "content": [
+                          "Requires financial expertise."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request \u2013 the provided parameters are invalid."
+          }
+        }
+      }
+    },
+    "/sync_types": {
+      "get": {
+        "tags": [
+          "Integrations"
+        ],
+        "summary": "List sync types",
+        "operationId": "listSyncTypes",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Optional sync type to filter by (e.g., employee_data).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "employee_data",
+                "time_off",
+                "pay_slips",
+                "otp",
+                "invoices",
+                "payments",
+                "equity",
+                "vendors",
+                "gl_payroll_journal",
+                "user_provisioning",
+                "identity",
+                "people_match"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sync types.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SyncType"
+                  }
+                },
+                "example": [
+                  {
+                    "type": "employee_data",
+                    "techs": [
+                      "api_open",
+                      "sftp"
+                    ],
+                    "standalone": true,
+                    "depends_on": [],
+                    "where_set_up": "employee_sync_plugin",
+                    "requirements": [
+                      {
+                        "category": "software",
+                        "content": [
+                          "Requires integration module",
+                          "API credentials needed"
+                        ]
+                      },
+                      {
+                        "category": "permissions",
+                        "content": [
+                          "User must have admin rights",
+                          "Manager approval required"
+                        ]
+                      }
+                    ],
+                    "sync_data": [
+                      {
+                        "category": "personal_info",
+                        "fields": [
+                          "first_name",
+                          "last_name",
+                          "city"
+                        ]
+                      },
+                      {
+                        "category": "job_info",
+                        "fields": [
+                          "job_title",
+                          "job_info_effective_date"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request \u2013 invalid sync type parameter."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "Integration": {
+        "type": "object",
+        "required": [
+          "id",
+          "third_party_software",
+          "display_name",
+          "deprecated",
+          "categories",
+          "product_lines",
+          "requirements"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the integration.",
+            "example": "12345"
+          },
+          "third_party_software": {
+            "type": "string",
+            "description": "The third-party software that this integration connects to.",
+            "enum": [
+              "netsuite",
+              "sage",
+              "xero",
+              "quickbooks",
+              "lucca",
+              "workday",
+              "sap_success_factors",
+              "bamboohr",
+              "ukg_ready",
+              "ukg_pro",
+              "personio",
+              "google_workspace",
+              "microsoft_entra",
+              "microsoft_teams",
+              "onelogin",
+              "okta",
+              "azure",
+              "slack",
+              "jira",
+              "ashby",
+              "greenhouse",
+              "lever",
+              "workable",
+              "sap_s4/hana",
+              "expensify",
+              "carta",
+              "generic",
+              "sage_intacct",
+              "workday_gpc"
+            ],
+            "example": "netsuite"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "A human-readable name for the integration.",
+            "example": "NetSuite 2.0"
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "Indicates if the integration is deprecated.",
+            "example": false
+          },
+          "categories": {
+            "type": "array",
+            "description": "One or more categories this integration belongs to.",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            },
+            "example": [
+              "accounting",
+              "automation"
+            ]
+          },
+          "product_lines": {
+            "type": "array",
+            "description": "Product lines supported by this integration.",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/ProductLines"
+            },
+            "example": [
+              {
+                "line": "global_payroll",
+                "categories": [
+                  "accounting",
+                  "automation"
+                ],
+                "use_cases": [
+                  {
+                    "use_case": "employee_onboarding",
+                    "more_info": {
+                      "method": "GET",
+                      "url": "/use_cases?use_case=employee_onboarding",
+                      "description": "Retrieve detailed info for employee_onboarding."
+                    }
+                  },
+                  {
+                    "use_case": "payroll_processing",
+                    "more_info": {
+                      "method": "GET",
+                      "url": "/use_cases?use_case=payroll_processing",
+                      "description": "Retrieve detailed info for payroll_processing."
+                    }
+                  }
+                ]
+              },
+              {
+                "line": "us_payroll",
+                "categories": [
+                  "accounting",
+                  "time_tracking"
+                ],
+                "use_cases": [
+                  {
+                    "use_case": "time_tracking",
+                    "more_info": {
+                      "method": "GET",
+                      "url": "/use_cases?use_case=time_tracking",
+                      "description": "Retrieve detailed info for time_tracking."
+                    }
+                  },
+                  {
+                    "use_case": "benefits_management",
+                    "more_info": {
+                      "method": "GET",
+                      "url": "/use_cases?use_case=benefits_management",
+                      "description": "Retrieve detailed info for benefits_management."
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "requirements": {
+            "type": "array",
+            "description": "List of requirements for the integration.",
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            },
+            "example": [
+              {
+                "category": "software",
+                "content": [
+                  "This is a requirement one",
+                  "This is a requirement two"
+                ]
+              },
+              {
+                "category": "permissions",
+                "content": [
+                  "User must have admin rights",
+                  "Consent required"
+                ]
+              }
+            ]
+          }
+        },
+        "example": {
+          "id": "12345",
+          "third_party_software": "netsuite",
+          "display_name": "NetSuite 2.0",
+          "deprecated": false,
+          "categories": [
+            "accounting",
+            "automation"
+          ],
+          "product_lines": [
+            {
+              "line": "global_payroll",
+              "categories": [
+                "accounting",
+                "automation"
+              ],
+              "use_cases": [
+                {
+                  "use_case": "employee_onboarding",
+                  "more_info": {
+                    "method": "GET",
+                    "url": "/use_cases?use_case=employee_onboarding",
+                    "description": "Retrieve detailed info for employee_onboarding."
+                  }
+                },
+                {
+                  "use_case": "payroll_processing",
+                  "more_info": {
+                    "method": "GET",
+                    "url": "/use_cases?use_case=payroll_processing",
+                    "description": "Retrieve detailed info for payroll_processing."
+                  }
+                }
+              ]
+            },
+            {
+              "line": "us_payroll",
+              "categories": [
+                "accounting",
+                "time_tracking"
+              ],
+              "use_cases": [
+                {
+                  "use_case": "time_tracking",
+                  "more_info": {
+                    "method": "GET",
+                    "url": "/use_cases?use_case=time_tracking",
+                    "description": "Retrieve detailed info for time_tracking."
+                  }
+                },
+                {
+                  "use_case": "benefits_management",
+                  "more_info": {
+                    "method": "GET",
+                    "url": "/use_cases?use_case=benefits_management",
+                    "description": "Retrieve detailed info for benefits_management."
+                  }
+                }
+              ]
+            }
+          ],
+          "requirements": [
+            {
+              "category": "software",
+              "content": [
+                "This is a requirement one",
+                "This is a requirement two"
+              ]
+            },
+            {
+              "category": "permissions",
+              "content": [
+                "User must have admin rights",
+                "Consent required"
+              ]
+            }
+          ]
+        }
+      },
+      "Category": {
+        "type": "string",
+        "description": "A category this integration belongs to.",
+        "enum": [
+          "global_payroll",
+          "equity",
+          "time_tracking",
+          "accounting",
+          "calendar",
+          "collaboration",
+          "hiring",
+          "expense_management",
+          "sso",
+          "user_management",
+          "app_provisioning",
+          "automation",
+          "scim",
+          "human_resources",
+          "issue_tracking",
+          "learning_management",
+          "performance_management",
+          "productivity",
+          "ats",
+          "itsm",
+          "hcm"
+        ],
+        "example": "accounting"
+      },
+      "ProductLines": {
+        "type": "object",
+        "required": [
+          "type",
+          "categories",
+          "use_cases"
+        ],
+        "properties": {
+          "line": {
+            "$ref": "#/components/schemas/ProductLine"
+          },
+          "categories": {
+            "type": "array",
+            "description": "Categories associated with this product line.",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "use_cases": {
+            "type": "array",
+            "description": "List of use cases for the product line (minimal info).",
+            "items": {
+              "$ref": "#/components/schemas/UseCaseRef"
+            }
+          }
+        },
+        "example": {
+          "line": "global_payroll",
+          "categories": [
+            "accounting",
+            "automation"
+          ],
+          "use_cases": [
+            {
+              "use_case": "employee_onboarding",
+              "more_info": {
+                "method": "GET",
+                "url": "/use_cases?use_case=employee_onboarding",
+                "description": "Retrieve detailed info for employee_onboarding."
+              }
+            },
+            {
+              "use_case": "payroll_processing",
+              "more_info": {
+                "method": "GET",
+                "url": "/use_cases?use_case=payroll_processing",
+                "description": "Retrieve detailed info for payroll_processing."
+              }
+            }
+          ]
+        }
+      },
+      "ProductLine": {
+        "type": "string",
+        "description": "Available product lines.",
+        "enum": [
+          "employer_of_record",
+          "independent_contractor",
+          "professional_employer_organization",
+          "contractor_of_record",
+          "global_payroll",
+          "us_payroll",
+          "deel_it",
+          "deel_hr"
+        ]
+      },
+      "Requirement": {
+        "type": "object",
+        "required": [
+          "category",
+          "content"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "The type of requirement.",
+            "enum": [
+              "software",
+              "permissions",
+              "expertise",
+              "pricing"
+            ],
+            "example": "software"
+          },
+          "content": {
+            "type": "array",
+            "description": "List of requirement texts.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "category": "software",
+          "content": [
+            "Integrates with ERP system",
+            "Supports API-based data exchange"
+          ]
+        }
+      },
+      "BusinessLine": {
+        "type": "object",
+        "required": [
+          "name",
+          "requirements"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The business line identifier.",
+            "example": "Corporate"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "List of requirements for the business line.",
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            }
+          }
+        },
+        "example": {
+          "name": "Corporate",
+          "requirements": [
+            {
+              "category": "software",
+              "content": [
+                "Requires enterprise-grade integration module"
+              ]
+            },
+            {
+              "category": "expertise",
+              "content": [
+                "Requires certified integration specialist"
+              ]
+            }
+          ]
+        }
+      },
+      "UseCaseRef": {
+        "type": "object",
+        "required": [
+          "use_case",
+          "more_info",
+          "requirements",
+          "status"
+        ],
+        "properties": {
+          "use_case": {
+            "type": "string",
+            "description": "The use case name.",
+            "example": "employee_onboarding",
+            "enum": [
+              "employee_onboarding",
+              "payroll_processing",
+              "time_tracking",
+              "benefits_management",
+              "vendor_management"
+            ]
+          },
+          "more_info": {
+            "$ref": "#/components/schemas/UseCaseLink"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "List of requirements for the use case.",
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/DevelopmentStatus"
+          }
+        }
+      },
+      "UseCaseLink": {
+        "type": "object",
+        "required": [
+          "method",
+          "url"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to retrieve detailed use case info.",
+            "example": "GET"
+          },
+          "url": {
+            "type": "string",
+            "description": "Relative URL to fetch detailed use case info.",
+            "example": "/use_cases?use_case=employee_onboarding"
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the link.",
+            "example": "Retrieve detailed info for the use case."
+          }
+        }
+      },
+      "UseCaseDetail": {
+        "type": "object",
+        "required": [
+          "use_case",
+          "sync_direction",
+          "notes",
+          "requirements",
+          "sync_types"
+        ],
+        "properties": {
+          "use_case": {
+            "$ref": "#/components/schemas/UseCaseEnum"
+          },
+          "sync_direction": {
+            "$ref": "#/components/schemas/SyncDirectionEnum"
+          },
+          "notes": {
+            "type": "array",
+            "description": "A list of integration-specific notes for the use case.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sync_types": {
+            "type": "array",
+            "description": "List of sync types associated with the use case.",
+            "items": {
+              "$ref": "#/components/schemas/UseCaseSyncType"
+            }
+          },
+          "requirements": {
+            "type": "array",
+            "description": "List of requirements for the use case.",
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            }
+          }
+        },
+        "example": {
+          "use_case": "employee_onboarding",
+          "sync_direction": "inbound",
+          "notes": [
+            "Detailed onboarding note 1",
+            "Detailed onboarding note 2"
+          ],
+          "sync_types": [
+            {
+              "sync_type": "employee_data",
+              "more_info": {
+                "method": "GET",
+                "url": "/sync_types?type=employee_data",
+                "description": "Retrieve detailed sync type info for employee_data."
+              }
+            }
+          ],
+          "requirements": [
+            {
+              "category": "software",
+              "content": [
+                "Must have HR module enabled.",
+                "Requires API credentials."
+              ]
+            },
+            {
+              "category": "permissions",
+              "content": [
+                "User must have manager approval."
+              ]
+            }
+          ]
+        }
+      },
+      "UseCaseEnum": {
+        "type": "string",
+        "description": "Allowed use cases for integrations.",
+        "enum": [
+          "employee_onboarding",
+          "payroll_processing",
+          "time_tracking",
+          "benefits_management",
+          "vendor_management"
+        ],
+        "x-enum-descriptions": {
+          "employee_onboarding": "Use case for onboarding new employees.",
+          "payroll_processing": "Use case for processing payroll information.",
+          "time_tracking": "Use case for tracking time and attendance.",
+          "benefits_management": "Use case for managing employee benefits.",
+          "vendor_management": "Use case for managing vendor relationships."
+        }
+      },
+      "UseCaseSyncType": {
+        "type": "object",
+        "required": [
+          "sync_type",
+          "more_info"
+        ],
+        "properties": {
+          "sync_type": {
+            "type": "string",
+            "description": "The sync type associated with this use case.",
+            "enum": [
+              "employee_data",
+              "time_off",
+              "pay_slips",
+              "otp",
+              "invoices",
+              "payments",
+              "equity",
+              "vendors",
+              "gl_payroll_journal",
+              "user_provisioning",
+              "identity",
+              "people_match"
+            ]
+          },
+          "more_info": {
+            "$ref": "#/components/schemas/UseCaseLink"
+          }
+        },
+        "example": {
+          "sync_type": "employee_data",
+          "more_info": {
+            "method": "GET",
+            "url": "/sync_types?type=employee_data",
+            "description": "Retrieve detailed sync type info for employee_data."
+          }
+        }
+      },
+      "SyncType": {
+        "type": "object",
+        "required": [
+          "type",
+          "techs",
+          "standalone",
+          "where_set_up",
+          "sync_data",
+          "requirements"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/SyncTypeEnum"
+          },
+          "techs": {
+            "type": "array",
+            "description": "The technologies used to sync the data.",
+            "items": {
+              "$ref": "#/components/schemas/SyncTechEnum"
+            },
+            "example": [
+              "api_open",
+              "sftp"
+            ]
+          },
+          "standalone": {
+            "type": "boolean",
+            "description": "Indicates whether this sync type can operate independently."
+          },
+          "depends_on": {
+            "type": "array",
+            "description": "If not standalone, lists the sync types that must be completed first.",
+            "items": {
+              "$ref": "#/components/schemas/SyncTypeEnum"
+            }
+          },
+          "where_set_up": {
+            "$ref": "#/components/schemas/WhereSetUpEnum"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "List of requirements for the sync type.",
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            },
+            "example": [
+              {
+                "category": "software",
+                "content": [
+                  "Requires integration module",
+                  "API credentials needed"
+                ]
+              },
+              {
+                "category": "permissions",
+                "content": [
+                  "User must have admin rights",
+                  "Manager approval required"
+                ]
+              }
+            ]
+          },
+          "sync_data": {
+            "type": "array",
+            "description": "For sync type \"employee_data\", specifies the active employee fields (grouped by category) for this integration.\n",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/JobInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/PersonalInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/WorkInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/CompensationInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/EmploymentInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/CostCenters"
+                },
+                {
+                  "$ref": "#/components/schemas/CountrySpecificInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/BankInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomInfo"
+                },
+                {
+                  "$ref": "#/components/schemas/ThirdPartyCustomInfo"
+                }
+              ]
+            },
+            "example": {
+              "type": "employee_data",
+              "techs": [
+                "api_open",
+                "sftp"
+              ],
+              "standalone": true,
+              "depends_on": [
+                "employee_data"
+              ],
+              "where_set_up": "employee_sync_plugin",
+              "requirements": [
+                {
+                  "category": "software",
+                  "content": [
+                    "Requires integration module",
+                    "API credentials needed"
+                  ]
+                },
+                {
+                  "category": "permissions",
+                  "content": [
+                    "User must have admin rights",
+                    "Manager approval required"
+                  ]
+                }
+              ],
+              "sync_data": [
+                {
+                  "category": "personal_info",
+                  "fields": [
+                    "first_name",
+                    "last_name",
+                    "city"
+                  ]
+                },
+                {
+                  "category": "job_info",
+                  "fields": [
+                    "job_title",
+                    "job_info_effective_date"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "SyncTypeEnum": {
+        "type": "string",
+        "description": "Available sync types.",
+        "enum": [
+          "employee_data",
+          "time_off",
+          "pay_slips",
+          "otp",
+          "invoices",
+          "payments",
+          "equity",
+          "vendors",
+          "gl_payroll_journal",
+          "user_provisioning",
+          "identity",
+          "people_match"
+        ]
+      },
+      "SyncTechEnum": {
+        "type": "string",
+        "description": "Technologies used to sync data.",
+        "enum": [
+          "api_open",
+          "api_graph",
+          "sftp",
+          "webhook"
+        ]
+      },
+      "WhereSetUpEnum": {
+        "type": "string",
+        "description": "The plugin or location where the sync is set up.",
+        "enum": [
+          "employee_sync_plugin",
+          "otp_plugin",
+          "pto_plugin",
+          "billing_and_invoice_sync",
+          "payment_sync_plugin",
+          "people_section",
+          "vendor_match",
+          "payroll_section"
+        ],
+        "x-enum-descriptions": {
+          "employee_sync_plugin": "Plugin to sync employee data inside the integration.",
+          "otp_plugin": "Plugin for one-time payment sync inside the integration.",
+          "pto_plugin": "Plugin for managing paid time off sync inside the integration.",
+          "billing_and_invoice_sync": "Plugin for billing and invoice sync inside the integration.",
+          "payment_sync_plugin": "Plugin for managing payment sync inside the integration.",
+          "people_section": "The main \"People\" section of Deel, accessible from the main nav.",
+          "vendor_match": "Vendor matching synchronization.",
+          "payroll_section": "The main \"Payroll\" section of Deel, accessible from the main nav."
+        }
+      },
+      "SyncDirectionEnum": {
+        "type": "string",
+        "description": "Specifies the data synchronization direction.",
+        "enum": [
+          "inbound",
+          "outbound",
+          "bidirectional"
+        ],
+        "x-enum-descriptions": {
+          "inbound": "Data flows from the third-party system to Deel.",
+          "outbound": "Data flows from Deel to the third-party system.",
+          "bidirectional": "Data flows in both directions."
+        }
+      },
+      "JobInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "job_info"
+            ],
+            "example": "job_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for job_info.",
+            "items": {
+              "$ref": "#/components/schemas/JobInfoFields"
+            }
+          }
+        },
+        "example": {
+          "category": "job_info",
+          "fields": [
+            "job_title",
+            "job_info_effective_date"
+          ]
+        }
+      },
+      "PersonalInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "personal_info"
+            ],
+            "example": "personal_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for personal_info.",
+            "items": {
+              "$ref": "#/components/schemas/PersonalInfoFields"
+            }
+          }
+        },
+        "example": {
+          "category": "personal_info",
+          "fields": [
+            "first_name",
+            "last_name",
+            "city"
+          ]
+        }
+      },
+      "WorkInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "work_info"
+            ],
+            "example": "work_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for work_info.",
+            "items": {
+              "$ref": "#/components/schemas/WorkInfoFields"
+            }
+          }
+        },
+        "example": {
+          "category": "work_info",
+          "fields": [
+            "email",
+            "start_date",
+            "fte"
+          ]
+        }
+      },
+      "CompensationInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "compensation_info"
+            ],
+            "example": "compensation_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for compensation_info.",
+            "items": {
+              "$ref": "#/components/schemas/CompensationInfoFields"
+            }
+          }
+        },
+        "example": {
+          "category": "compensation_info",
+          "fields": [
+            "pay_rate",
+            "pay_rate_time_frame"
+          ]
+        }
+      },
+      "EmploymentInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "employment_info"
+            ],
+            "example": "employment_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for employment_info.",
+            "items": {
+              "$ref": "#/components/schemas/EmploymentInfoFields"
+            }
+          }
+        },
+        "example": {
+          "category": "employment_info",
+          "fields": [
+            "employment_type",
+            "employment_effective_date"
+          ]
+        }
+      },
+      "CostCenters": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "cost_centers"
+            ],
+            "example": "cost_centers"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for cost_centers.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cost_center_code",
+                "cost_center_name"
+              ]
+            }
+          }
+        },
+        "example": {
+          "category": "cost_centers",
+          "fields": [
+            "cost_center_code",
+            "cost_center_name"
+          ]
+        }
+      },
+      "CountrySpecificInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "country_specific_info"
+            ],
+            "example": "country_specific_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for country_specific_info.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "national_id",
+                "tax_code"
+              ]
+            }
+          }
+        },
+        "example": {
+          "category": "country_specific_info",
+          "fields": [
+            "national_id",
+            "tax_code"
+          ]
+        }
+      },
+      "BankInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "bank_info"
+            ],
+            "example": "bank_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for bank_info.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "bank_account_number",
+                "bank_routing_number",
+                "bank_name"
+              ]
+            }
+          }
+        },
+        "example": {
+          "category": "bank_info",
+          "fields": [
+            "bank_account_number",
+            "bank_routing_number"
+          ]
+        }
+      },
+      "CustomInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "custom_info"
+            ],
+            "example": "custom_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for custom_info.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "custom_field_1",
+                "custom_field_2"
+              ]
+            }
+          }
+        },
+        "example": {
+          "category": "custom_info",
+          "fields": [
+            "custom_field_1",
+            "custom_field_2"
+          ]
+        }
+      },
+      "ThirdPartyCustomInfo": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "third_party_custom_info"
+            ],
+            "example": "third_party_custom_info"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of active field keys for third_party_custom_info.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "third_party_field_1",
+                "third_party_field_2"
+              ]
+            }
+          }
+        },
+        "example": {
+          "category": "third_party_custom_info",
+          "fields": [
+            "third_party_field_1",
+            "third_party_field_2"
+          ]
+        }
+      },
+      "FieldDefinition": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "label",
+          "required",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique key for the field."
+          },
+          "type": {
+            "type": "string",
+            "description": "Data type for the field."
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label for the field."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether the field is required."
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the field."
+          },
+          "format": {
+            "type": "string",
+            "description": "Optional format information (e.g., date-long).",
+            "nullable": true
+          },
+          "max_length": {
+            "type": "integer",
+            "description": "Optional maximum length.",
+            "nullable": true
+          },
+          "example": {
+            "type": "string",
+            "description": "An example value for the field."
+          }
+        }
+      },
+      "CountrySpecificFieldDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FieldDefinition"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "applicable_countries": {
+                "type": "array",
+                "description": "List of ISO country codes where this field is applicable.",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "BR",
+                  "UY",
+                  "ES",
+                  "IT"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "EmployeeSyncFieldDefinitionsGeneric": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "The employee sync field category (non-country-specific).",
+            "enum": [
+              "job_info",
+              "personal_info",
+              "work_info",
+              "compensation_info",
+              "employment_info",
+              "cost_centers",
+              "bank_info",
+              "custom_info",
+              "third_party_custom_info"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "description": "Detailed definitions for each field in the category.",
+            "items": {
+              "$ref": "#/components/schemas/FieldDefinition"
+            }
+          }
+        },
+        "example": {
+          "category": "job_info",
+          "fields": [
+            {
+              "name": "job_title",
+              "type": "string",
+              "label": "Job Title",
+              "required": true,
+              "description": "The official job title of the employee.",
+              "max_length": 100,
+              "example": "Software Engineer"
+            },
+            {
+              "name": "job_info_effective_date",
+              "type": "string",
+              "label": "Job Info Effective Date",
+              "required": true,
+              "format": "date-long",
+              "description": "The date when the current job title became effective.",
+              "example": "2023-01-01"
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "label": "State",
+              "required": false,
+              "description": "The state where the employee is located.",
+              "example": "California"
+            }
+          ]
+        }
+      },
+      "EmployeeSyncFieldDefinitionsCountrySpecific": {
+        "type": "object",
+        "required": [
+          "category",
+          "fields"
+        ],
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "The employee sync field category for country-specific information.",
+            "enum": [
+              "country_specific_info"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "description": "Detailed definitions for each field in the country-specific category.",
+            "items": {
+              "$ref": "#/components/schemas/CountrySpecificFieldDefinition"
+            }
+          }
+        },
+        "example": {
+          "category": "country_specific_info",
+          "fields": [
+            {
+              "name": "national_id",
+              "type": "string",
+              "label": "National ID",
+              "required": true,
+              "description": "The national identification number required for employees in Brazil, Uruguay, Spain, and Italy.",
+              "max_length": 50,
+              "example": "123456789",
+              "applicable_countries": [
+                "BR",
+                "UY",
+                "ES",
+                "IT"
+              ]
+            },
+            {
+              "name": "tax_code",
+              "type": "string",
+              "label": "Tax Code",
+              "required": false,
+              "description": "The tax identification code required for employees in United Kingdom and Japan.",
+              "max_length": 50,
+              "example": "TAX1234",
+              "applicable_countries": [
+                "GB",
+                "JP"
+              ]
+            }
+          ]
+        }
+      },
+      "JobInfoFields": {
+        "type": "string",
+        "description": "Allowed field keys for job_info.",
+        "enum": [
+          "job_title",
+          "job_info_effective_date",
+          "state"
+        ]
+      },
+      "PersonalInfoFields": {
+        "type": "string",
+        "description": "Allowed field keys for personal_info.",
+        "enum": [
+          "first_name",
+          "last_name",
+          "city"
+        ]
+      },
+      "WorkInfoFields": {
+        "type": "string",
+        "description": "Allowed field keys for work_info.",
+        "enum": [
+          "email",
+          "start_date",
+          "fte"
+        ]
+      },
+      "CompensationInfoFields": {
+        "type": "string",
+        "description": "Allowed field keys for compensation_info.",
+        "enum": [
+          "pay_rate",
+          "pay_rate_time_frame",
+          "compensation_effective_date"
+        ]
+      },
+      "EmploymentInfoFields": {
+        "type": "string",
+        "description": "Allowed field keys for employment_info.",
+        "enum": [
+          "employment_type",
+          "employment_effective_date",
+          "termination_reason"
+        ]
+      },
+      "DevelopmentStatus": {
+        "type": "string",
+        "description": "The development status of a use case or related item.",
+        "enum": [
+          "wont_do",
+          "not_supported",
+          "planned",
+          "in_dev",
+          "beta",
+          "public_availability"
+        ],
+        "example": "Planned"
+      }
+    }
+  }
+}
