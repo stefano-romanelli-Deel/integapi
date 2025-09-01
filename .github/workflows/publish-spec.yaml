@@ -1,0 +1,39 @@
+name: Publish Deel OpenAPI (JSON)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Runs daily at 04:30 UTC
+    - cron: "30 4 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch latest OpenAPI JSON
+        env:
+          SPEC_URL: https://api.letsdeel.com/openapi/rest/definitions
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          curl --location --fail --silent "$SPEC_URL" -o site/latest.json
+          jq . site/latest.json > site/tmp.json
+          mv site/tmp.json site/latest.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
