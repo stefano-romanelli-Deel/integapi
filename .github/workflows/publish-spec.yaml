@@ -18,7 +18,16 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # 👇 This is what your error is asking for
+    environment:
+      name: github-pages
+      # optional: surface the site URL in the environment, populated by deploy step
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Fetch latest OpenAPI JSON
         env:
           SPEC_URL: https://api.letsdeel.com/openapi/rest/definitions
@@ -26,10 +35,11 @@ jobs:
           set -euo pipefail
           mkdir -p site
           curl --location --fail --silent "$SPEC_URL" -o site/latest.json
+          # Validate JSON (jq is preinstalled on ubuntu-latest; if not, apt-get install jq)
           jq . site/latest.json > site/tmp.json
           mv site/tmp.json site/latest.json
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
